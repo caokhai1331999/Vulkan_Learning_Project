@@ -1,0 +1,34 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "cppbuild",
+			"label": "C/C++: g++.exe build active file",
+			"command": "C:/MinGW/bin/g++.exe",
+			"args": [
+				"-fdiagnostics-color=always",
+				"-g",
+				"-Wall",
+				"-std=c++17",
+				"-fexceptions",
+				"-DGLFW_DLL",
+				"-DSTB_IMAGE_IMPLEMENTATION",
+				"${fileDirname}\\**.cpp",
+            	"${fileDirname}\\**.h",
+				"-IC:\\MinGW\\include",
+				"-LC:\\MinGW\\lib",
+				"-lglfw3", "-lopengl32", "-lgdi32",
+				"-o",
+				"${fileDirname}\\obj\\debug\\${fileBasenameNoExtension}.exe"
+			],
+			"options": {
+				"cwd": "C:/MinGW/bin"
+			},
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build",
+			"detail": "compiler: C:/MinGW/bin/g++.exe"
+		}
+	]
+}

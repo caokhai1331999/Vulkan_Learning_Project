@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="GLFW2" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/GLFW2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/GLFW2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=gnu++14" />
+			<Add option="-fexceptions" />
+			<Add option="-DGLFW_DLL" />
+			<Add option="-DSTB_IMAGE_IMPLEMENTATION" />
+			<Add directory="C:/MinGW/include" />
+		</Compiler>
+		<Linker>
+			<Add option="-lglfw3 -lopengl32 -lgdi32" />
+			<Add library="C:/MinGW/lib/libglfw3.a" />
+			<Add library="C:/MinGW/lib/libglfw3dll.a" />
+			<Add library="C:/MinGW/lib/libopengl32.a" />
+			<Add directory="C:/MinGW/lib" />
+		</Linker>
+		<Unit filename="camera.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="shader_s.h" />
+		<Unit filename="stb_image.h" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
