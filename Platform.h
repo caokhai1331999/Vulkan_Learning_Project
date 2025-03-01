@@ -9,6 +9,8 @@
 
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#include <>
+#include <vector>
 #include <iostream>
 
 
@@ -21,8 +23,11 @@ struct Platform{
     Platform(){
         window = nullptr;
     }
-}Platform;
+};
 
+#if !defined
+extern Platform platform = {}; 
+#endif
 void initWindow();
 void initVulkan();
 void createInstance();
