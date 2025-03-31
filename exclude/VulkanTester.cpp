@@ -9,9 +9,12 @@
 #include <cstdlib>
 #include "Platform.h"
 
+#pragma once
+
 int main(int argc, char* argv) {
     try {
-        run();
+        Platform platform ={};
+        run(&platform);
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;

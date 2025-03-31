@@ -7,7 +7,7 @@
    ======================================================================== */
 #include "Platform.h"
 
-void initWindow() {
+void initWindow(Platform* p) {
     glfwInit();
 
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -16,15 +16,15 @@ void initWindow() {
     GLFWwindow* tempWindow = nullptr;
     tempWindow = glfwCreateWindow(WIDTH, HEIGHT, "Vulkan", nullptr, nullptr);
 
-    platform.window = tempWindow;
+    p->window = tempWindow;
 }
 
-void initVulkan() {
-    initWindow();
-    createInstance();
+void initVulkan(Platform* p) {
+    initWindow(p);
+    createInstance(p);
 }
 
-void createInstance(){
+void createInstance(Platform* p){
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     appInfo.pApplicationName = "Hello Triangle";
@@ -61,28 +61,37 @@ void createInstance(){
     createInfo.enabledExtensionCount = (uint32_t) requiredExtensions.size();
     createInfo.ppEnabledExtensionNames = requiredExtensions.data();
     
-    if(vkCreateInstance(&createInfo, nullptr, &platform.instance)!= VK_SUCCESS){
+    if(vkCreateInstance(&createInfo, nullptr, &p->instance)!= VK_SUCCESS){
         throw std::runtime_error("Failed to create instance\n");
     }else{
         printf("Success create instance for Vulkan\n");
     }
+
+    uint32_t extensionCount;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+    std::vector<VkExtensionProperties>extensions(extensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+    std::cout<<"Available extension\n";
+    for(const auto& extension:extensions){
+        std::cout<<'\t'<<extension.extensionName<<'\n';
+    };
 }
 
-void mainLoop() {
-    while(!glfwWindowShouldClose(platform.window)){
+void mainLoop(Platform* p) {
+    while(!glfwWindowShouldClose(p->window)){
         glfwPollEvents();
     }
 }
 
-void cleanup() {
-    vkDestroyInstance(platform.instance, nullptr);    
-    glfwDestroyWindow(platform.window);
+void cleanup(Platform* p) {
+    vkDestroyInstance(p->instance, nullptr);    
+    glfwDestroyWindow(p->window);
     glfwTerminate();
 }
 
-void run() {
-    initVulkan();
-    mainLoop();
-    cleanup();
+void run(Platform* p) {
+    initVulkan(p);
+    mainLoop(p);
+    cleanup(p);
 }
 
