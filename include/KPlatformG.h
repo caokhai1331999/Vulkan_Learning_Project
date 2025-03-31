@@ -6,26 +6,27 @@
    $Creator: Cao Khai(Casey disciple) $
    $Notice: (C) Copyright 2024 by Cao Khai, Inc. All Rights Reserved. $
    ======================================================================== */
+#include "stdio.h"
 #include <iostream>
+
 #if !defined
-#define GLAD_LIB
+#define GLAD_LIB_AND_SHADER
 #include <glad/glad.h>
 #include <glad/glad.c>//must be place
 #endif
-#include <GLFW/glfw3.h>
 
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #if !defined
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #endif
-
-#include "stdio.h"
-// #include "stdint.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include "shader_s.h"
 #include "camera.h"
+// #include "stdint.h"
+// #include <glm/glm.hpp>
+
 
 using namespace std;
 // settings

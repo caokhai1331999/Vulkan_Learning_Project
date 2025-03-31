@@ -146,7 +146,7 @@ bool Init(Platform* PlatForm){
     } else {
         std::cout << "glCreateShader address: " << (void*)glCreateShader << std::endl;
     }
-
+    
     if (!glfwGetCurrentContext()) {
         std::cerr << "OpenGL context is NULL!" << std::endl;
         return false;

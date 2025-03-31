@@ -1,8 +1,7 @@
-#include "shader_s.h"
 #include "KPlatformG.h"
+#include "shader_s.h"
 #include "Windows.h"
 // #include <stdio.h>
-// #include "shader_s.h"
 // #include "camera.h"
 
 #pragma once
@@ -33,6 +32,13 @@ MOUSE_CALLBACK_* mouse_callback_ = nullptr;
 SCROLL_CALLBACK_* scroll_callback_ = nullptr;
 PROCESSINPUT_* processInput_ = nullptr;
 LOAD_TEXTURE_* LoadTexture_ = nullptr;
+
+void LoadGLFunctions() {
+    if (!gladLoadGL()) {
+        std::cerr << "Failed to load OpenGL!" << std::endl;
+    }
+}
+
 
 void GetFunction(){
 
@@ -67,9 +73,12 @@ int main(int* argc, char** argv[])
         printf("Can not Init Platform\n");
         return -1;
     } else {
-        Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
         printf("Init platform successfully\n");
     }
+
+    LoadGLFunctions();
+    Shader* ourShader = nullptr;
+    ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
     // build and compile our shader zprogram
     // ------------------------------------
     //NOTE: Why crashed
@@ -167,9 +176,9 @@ int main(int* argc, char** argv[])
     float z = 1.0f;
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
-    ourShader.use();
-    ourShader.setInt("texture1", 0);
-    ourShader.setInt("texture2", 1);
+    ourShader->use();
+    ourShader->setInt("texture1", 0);
+    ourShader->setInt("texture2", 1);
     delete []texture;
 
     int delayTime = 0;
@@ -207,17 +216,17 @@ int main(int* argc, char** argv[])
         glBindTexture(GL_TEXTURE_2D, texture2);
 
         // activate shader
-        ourShader.use();
+        ourShader->use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
 
         //NOTE: These line create a region of space that appeared on screen
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader.setMat4("projection", projection);
+        ourShader->setMat4("projection", projection);
 
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        ourShader.setMat4("view", view);
+        ourShader->setMat4("view", view);
         // render boxes
         glBindVertexArray(VAO);
 
@@ -275,7 +284,7 @@ int main(int* argc, char** argv[])
             //every third cude rotate
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
-            ourShader.setMat4("model",model);
+            ourShader->setMat4("model",model);
             glDrawArrays(GL_TRIANGLES,0,36);
 
             lastFrame = static_cast<float>(glfwGetTime());
@@ -295,7 +304,8 @@ int main(int* argc, char** argv[])
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-
+    delete ourShader;
+    ourShader = nullptr;
     delete PlatForm;
     PlatForm = nullptr;
     // glfw: terminate, clearing all previously allocated GLFW resources.

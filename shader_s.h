@@ -1,9 +1,13 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#if !defined
+#define GLAD_LIB_AND_SHADER
 #include <glad/glad.h>
-#include <glm/glm.hpp>
+#endif
 
+#include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -51,6 +55,11 @@ public:
         unsigned int vertex, fragment;        
         // vertex shader
         vertex = glCreateShader(GL_VERTEX_SHADER);
+        if (vertex == 0) {
+            std::cerr << "Failed to create shader!" << std::endl;
+        }else{
+            std::cout << "test shader was created succeessfully\n";
+        }
         glShaderSource(vertex, 1, &vShaderCode, NULL);
         glCompileShader(vertex);
         checkCompileErrors(vertex, "VERTEX");
