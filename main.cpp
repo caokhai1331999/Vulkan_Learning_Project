@@ -25,7 +25,7 @@ typedef PROCESSINPUT(PROCESSINPUT_);
 typedef LOAD_TEXTURE(LOAD_TEXTURE_);
 
 HMODULE PlatformLibrary;
-
+static bool firstLoad = false;
 INIT_* Init_ = nullptr;
 FRAMEBUFFER_SIZE_CALLBACK_* framebuffer_size_callback_ = nullptr;
 MOUSE_CALLBACK_* mouse_callback_ = nullptr;
@@ -51,7 +51,10 @@ void GetFunction(){
 
     if(PlatformLibrary){
 
+        if(!firstLoad){
         Init_ =(INIT_*) GetProcAddress( PlatformLibrary, "Init");
+            firstLoad = true;
+        }
         framebuffer_size_callback_ =(FRAMEBUFFER_SIZE_CALLBACK_*) GetProcAddress(PlatformLibrary, "framebuffer_size_callback");
         mouse_callback_ = (MOUSE_CALLBACK_*)GetProcAddress(PlatformLibrary, "mouse_callback");
         scroll_callback_ = (SCROLL_CALLBACK_*)GetProcAddress(PlatformLibrary, "scroll_callback");
@@ -66,17 +69,17 @@ void GetFunction(){
 
 int main(int* argc, char** argv[])
 {
-    GetFunction();
+    // GetFunction();
     Platform* PlatForm = new Platform;
-
-    if (!Init_(PlatForm)){
+    if (!Init(PlatForm)){
         printf("Can not Init Platform\n");
         return -1;
     } else {
         printf("Init platform successfully\n");
     }
 
-    LoadGLFunctions();
+    // NOTE: I have to recall this function to load gl function
+    // LoadGLFunctions();        
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
     // build and compile our shader zprogram
@@ -162,7 +165,7 @@ int main(int* argc, char** argv[])
     // Load and create textures
     unsigned int texture1, texture2;
     unsigned int* texture;
-    texture = LoadTexture_();
+    texture = LoadTexture();
     texture1 = texture[0];
     texture2 = texture[1];
     printf("Game crash after this texture\n");
@@ -189,20 +192,21 @@ int main(int* argc, char** argv[])
     while (!glfwWindowShouldClose(PlatForm->window))
     {
 
-        if(delayTime >= 40){
-            FreeLibrary(PlatformLibrary);
-            GetFunction();
-            delayTime = 0;
-            printf("Reload game code successfully\n");
-        } else {
-            delayTime++;
-        }
+        // if(delayTime >= 120){
+        //     FreeLibrary(PlatformLibrary);
+        //     GetFunction();
+        //     delayTime = 0;
+        //     printf("Reload game code successfully\n");
+        // } else {
+        //     delayTime++;
+        // }
+
         // per-frame time logic
         // --------------------
         //Why the lastFrame and currentFrame time gap is so much
         // input
         // -----
-        processInput_(PlatForm->window);
+        processInput(PlatForm->window);
 
         // render
         // ------
@@ -215,6 +219,13 @@ int main(int* argc, char** argv[])
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, texture2);
 
+        if(PlatForm->window == nullptr){
+            printf("Failed to create window\n");
+        }
+
+        if(ourShader == nullptr){
+            printf("Failed to create shader\n");
+        }
         // activate shader
         ourShader->use();
 
@@ -290,9 +301,9 @@ int main(int* argc, char** argv[])
             lastFrame = static_cast<float>(glfwGetTime());
             deltaTime = lastFrame - currentFrame;
 
-            printf("Current frame time is:%f\n", currentFrame);
-            printf("Last Frame time is:%f\n", lastFrame);
-            printf("Frame time is:%f\n", deltaTime);
+            // printf("Current frame time is:%f\n", currentFrame);
+            // printf("Last Frame time is:%f\n", lastFrame);
+            // printf("Frame time is:%f\n", deltaTime);
         }
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

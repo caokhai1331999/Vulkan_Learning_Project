@@ -9,21 +9,21 @@
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // -----------------------------------------------------------------------------------
-#if !defined
-#define WIN32_PLATFORM
-BOOL WINAPI DllMain(
-    HINSTANCE hinstDLL,  // handle to DLL module
-    DWORD fdwReason,     // reason for calling function
-    LPVOID lpvReserved )  // reserved
-{
-    return TRUE;  // Successful DLL_PROCESS_ATTACH.
-}
-#endif
+// #if !defined
+// #define WIN32_PLATFORM
+// BOOL WINAPI DllMain(
+//     HINSTANCE hinstDLL,  // handle to DLL module
+//     DWORD fdwReason,     // reason for calling function
+//     LPVOID lpvReserved )  // reserved
+// {
+//     return TRUE;  // Successful DLL_PROCESS_ATTACH.
+// }
+// #endif
 
-// Exported function
-extern "C" __declspec(dllexport) void GameFunction() {
-    std::cout << "Game code exported!\n";
-}
+// // Exported function
+// extern "C" __declspec(dllexport) void GameFunction() {
+//     std::cout << "Game code exported!\n";
+// }
 
 
 void processInput(GLFWwindow *window)
@@ -86,6 +86,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
         pitch = -89.0f;
 
     glm::vec3 front;
+
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
