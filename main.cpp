@@ -66,6 +66,7 @@ void GetFunction(){
         printf("Failed to load game code\n");        
     }
 }
+// NOTE: Try not to copy code. Remember its logic
 
 int main(int* argc, char** argv[])
 {
@@ -84,54 +85,10 @@ int main(int* argc, char** argv[])
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
     // build and compile our shader zprogram
     // ------------------------------------
-    //NOTE: Why crashed
-    printf("Game crash before shader\n");
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
     //
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-    };
     // world space positions of our cubes
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -145,22 +102,9 @@ int main(int* argc, char** argv[])
         glm::vec3( 1.5f,  0.2f, -1.5f),
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
 
-    glBindVertexArray(VAO);
+    CreateVertexStuff(&platform->VBO, &platform->VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-    // texture coord attribute
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    printf("Game crash after this vertext array\n");
     
     // Load and create textures
     unsigned int texture1, texture2;
@@ -168,7 +112,7 @@ int main(int* argc, char** argv[])
     texture = LoadTexture();
     texture1 = texture[0];
     texture2 = texture[1];
-    printf("Game crash after this texture\n");
+    // printf("Game crash after this texture\n");
     
     float count = 0.0f;
     float lastFrame = 0.0f;
@@ -180,10 +124,12 @@ int main(int* argc, char** argv[])
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     ourShader->use();
+    // NOTE: second argument indicate the GLenum texture index that was already initialized
     ourShader->setInt("texture1", 0);
     ourShader->setInt("texture2", 1);
     delete []texture;
-
+    texture = nullptr;
+    
     int delayTime = 0;
     // render loop
     // -----------
@@ -214,23 +160,27 @@ int main(int* argc, char** argv[])
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // bind textures on corresponding texture units
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, texture2);
+        BindTexture(GL_TEXTURE0, &texture1);
+        BindTexture(GL_TEXTURE1, &texture2);
 
-        if(PlatForm->window == nullptr){
-            printf("Failed to create window\n");
-        }
+        // if(PlatForm->window == nullptr){
+        //     printf("Failed to create window\n");
+        // }
 
-        if(ourShader == nullptr){
-            printf("Failed to create shader\n");
-        }
+        // if(ourShader == nullptr){
+        //     printf("Failed to create shader\n");
+        // }        
+        
         // activate shader
         ourShader->use();
 
         // pass projection matrix to shader (note that in this case it could change every frame)
 
+        // NOTE: mat4 is to create a 3D space
+        // WORKING!!
+        glm::mat4 
+        //========================================= 
+            
         //NOTE: These line create a region of space that appeared on screen
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader->setMat4("projection", projection);
@@ -239,8 +189,7 @@ int main(int* argc, char** argv[])
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader->setMat4("view", view);
         // render boxes
-        glBindVertexArray(VAO);
-
+        
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
@@ -264,12 +213,14 @@ int main(int* argc, char** argv[])
 
         for (unsigned int i = 0; i < 10; i++)
         {
-            glm::mat4 model = glm::mat4(1.0f);
             // the glm::mat4 is for create a cube
+            glm::mat4 model = glm::mat4(1.0f);
             //
             // Don't understand this step
             model = glm::translate(model,cubePositions[i]);
             float angle = 50.0f;
+            // These lines for moving cubes
+
             model = glm::rotate(model,glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
 
             if (i==1 || i==3) {                
@@ -278,7 +229,6 @@ int main(int* argc, char** argv[])
             model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
             // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
                 
-
             // printf("Count is :%f\n", count);
 
             // NOTE: translate is to move he thing
