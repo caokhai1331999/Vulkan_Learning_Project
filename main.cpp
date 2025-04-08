@@ -83,6 +83,8 @@ int main(int* argc, char** argv[])
     // LoadGLFunctions();        
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
+    Shader* lightingShader = nullptr;
+    lightingShader = new Shader("lightingSource.vs", "color.fs");
     // build and compile our shader zprogram
     // ------------------------------------
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -103,8 +105,10 @@ int main(int* argc, char** argv[])
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    CreateVertexStuff(&platform->VBO, &platform->VAO);
+    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+    CreateVertexStuff(PlatForm);
+    
     
     // Load and create textures
     unsigned int texture1, texture2;
@@ -161,24 +165,15 @@ int main(int* argc, char** argv[])
 
         // bind textures on corresponding texture units
         BindTexture(GL_TEXTURE0, &texture1);
-        BindTexture(GL_TEXTURE1, &texture2);
-
-        // if(PlatForm->window == nullptr){
-        //     printf("Failed to create window\n");
-        // }
-
-        // if(ourShader == nullptr){
-        //     printf("Failed to create shader\n");
-        // }        
-        
+        BindTexture(GL_TEXTURE1, &texture2);        
         // activate shader
         ourShader->use();
-
+        lightingShader->use();
+        
         // pass projection matrix to shader (note that in this case it could change every frame)
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
-        glm::mat4 
         //========================================= 
             
         //NOTE: These line create a region of space that appeared on screen
@@ -256,6 +251,11 @@ int main(int* argc, char** argv[])
             // printf("Frame time is:%f\n", deltaTime);
         }
 
+        glm::mat4 lightModel = glm::mat4(1.0f);
+        lightModel = translate(lightModel, lightPos);
+        lightModel = scale(lightModel, glm::vec3(2.0f));
+        lightingShader->setMat4("LightCube", lightModel);
+        glDrawArrays(GL_TRIANGLES, 1, 36);        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(PlatForm->window);
@@ -263,10 +263,13 @@ int main(int* argc, char** argv[])
     }
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, &PlatForm->VAO);
+    glDeleteVertexArrays(1, &PlatForm->lightVAO);
+    glDeleteBuffers(1, &PlatForm->VBO);
     delete ourShader;
     ourShader = nullptr;
+    delete lightingShader;
+    lightingShader = nullptr;
     delete PlatForm;
     PlatForm = nullptr;
     // glfw: terminate, clearing all previously allocated GLFW resources.
