@@ -54,17 +54,27 @@ float StandardFrame = 0.0f;
 
 struct Platform{
     GLFWwindow* window;
+    unsigned int VBO;
+    unsigned int VAO;
+    unsigned int lightVAO;
     // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     Platform(){
         window = NULL;
     };
 };
 
+// struct LightingSouce{
+    
+// };
+
 bool Init(Platform* PlatForm);
+void CreateVertexStuff(Platform* p);
+void BindTexture(const GLenum index, const unsigned int* texture);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
+
 unsigned int* LoadTexture();
 
 #define PLATFORMG_H
