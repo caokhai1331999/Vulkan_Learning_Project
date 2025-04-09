@@ -158,12 +158,6 @@ void CreateVertexStuff(Platform* p)
 
 }
 
-void BindTexture(const GLenum index, const unsigned int* texture){    
-        // bind textures on corresponding texture units
-    glActiveTexture(index);
-    glBindTexture(GL_TEXTURE_2D, *texture);
-}
-
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)

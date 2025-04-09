@@ -174,32 +174,30 @@ int main(int* argc, char** argv[])
         //========================================= 
         //NOTE: These line create a region of space that appeared on screen
 
-        glm::mat4 lightModel = glm::mat4(1.0f);            
 
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader->setMat4("projection", projection);
 
-        // lightingShader->setMat4("Lprojection", projection);
+        lightingShader->setMat4("Lprojection", projection);
         
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader->setMat4("view", view);
-
-        // lightingShader->setMat4("Lview", view);
+        lightingShader->setMat4("Lview", view);
         // ON WORKING!!: Light Cube construct
         glm::vec3 lightColor = {0.0f, 1.0f, 0.0f};
         glm::vec3 toyColor = {1.0f, 0.5f, 0.31f};
 
-        lightingShader->setVec3("ObjectColor", toyColor);
-        lightingShader->setVec3("LightColor", lightColor);
-
+        glm::mat4 lightModel = glm::mat4(1.0f);            
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
 
+        lightingShader->use();
         lightingShader->setMat4("Lmodel", lightModel);
-
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
+        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // NOTE: For some reason the LightShader overrided the ourShader and clear the whole Scene
         //===================================================================
