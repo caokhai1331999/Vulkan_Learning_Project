@@ -1,5 +1,4 @@
 #include "KPlatformG.h"
-#include "shader_s.h"
 #include "Windows.h"
 // #include <stdio.h>
 // #include "camera.h"
@@ -83,8 +82,13 @@ int main(int* argc, char** argv[])
     // LoadGLFunctions();        
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
+
     Shader* lightingShader = nullptr;
     lightingShader = new Shader("lightingSource.vs", "color.fs");
+
+// Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
+    
+    
     // build and compile our shader zprogram
     // ------------------------------------
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -109,8 +113,7 @@ int main(int* argc, char** argv[])
 
     CreateVertexStuff(PlatForm);
     
-    
-    // Load and create textures
+        // Load and create textures
     unsigned int texture1, texture2;
     unsigned int* texture;
     texture = LoadTexture();
@@ -128,9 +131,11 @@ int main(int* argc, char** argv[])
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     ourShader->use();
+    lightingShader->use();
     // NOTE: second argument indicate the GLenum texture index that was already initialized
-    ourShader->setInt("texture1", 0);
-    ourShader->setInt("texture2", 1);
+    ourShader->setInt("texture1", texture1);
+    ourShader->setInt("texture2", texture2);
+
     delete []texture;
     texture = nullptr;
     
@@ -168,23 +173,24 @@ int main(int* argc, char** argv[])
         BindTexture(GL_TEXTURE1, &texture2);        
         // activate shader
         ourShader->use();
-        lightingShader->use();
         
         // pass projection matrix to shader (note that in this case it could change every frame)
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
         //========================================= 
-            
+        glm::mat4 lightModel = glm::mat4(1.0f);            
         //NOTE: These line create a region of space that appeared on screen
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader->setMat4("projection", projection);
-
+        lightingShader->setMat4("Lprojection", projection);
+        
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader->setMat4("view", view);
-        // render boxes
-        
+        lightingShader->setMat4("Lview", view);
+
+        // render boxes        
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
@@ -237,7 +243,7 @@ int main(int* argc, char** argv[])
             model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
             model = glm::translate(model, count*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));                            
             }
-            //every third cude rotate
+            //every third cube rotate
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
             ourShader->setMat4("model",model);
@@ -250,11 +256,12 @@ int main(int* argc, char** argv[])
             // printf("Last Frame time is:%f\n", lastFrame);
             // printf("Frame time is:%f\n", deltaTime);
         }
+        // Shader lightingShader("lightingSource.vs", "color.fs");
 
-        glm::mat4 lightModel = glm::mat4(1.0f);
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
-        lightingShader->setMat4("LightCube", lightModel);
+        lightingShader->setMat4("Lmodel", lightModel);
+
         glDrawArrays(GL_TRIANGLES, 1, 36);        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
