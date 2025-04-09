@@ -56,8 +56,7 @@ struct Platform{
     GLFWwindow* window;
     unsigned int VBO;
     unsigned int VAO;
-    unsigned int lightVAO;
-    // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
+    unsigned int EBO;
     Platform(){
         window = NULL;
     };
@@ -74,8 +73,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-
-unsigned int* LoadTexture();
+void LoadTexture();
 
 #define PLATFORMG_H
 #endif

@@ -1,5 +1,5 @@
 #version 330 core
-#Set the output color vector first
+//Set the output color vector first
 out vec4 FragColor;
 
 uniform vec3 ObjectColor;

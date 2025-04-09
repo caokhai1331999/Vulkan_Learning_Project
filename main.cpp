@@ -80,11 +80,12 @@ int main(int* argc, char** argv[])
 
     // NOTE: I have to recall this function to load gl function
     // LoadGLFunctions();        
+    Shader* lightingShader = nullptr;
+    lightingShader = new Shader("lightingSource.vs", "colorS.fs");
+
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
 
-    Shader* lightingShader = nullptr;
-    lightingShader = new Shader("lightingSource.vs", "color.fs");
 
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
@@ -96,6 +97,8 @@ int main(int* argc, char** argv[])
     //
 
     // world space positions of our cubes
+
+    CreateVertexStuff(PlatForm);
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
         glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -110,17 +113,10 @@ int main(int* argc, char** argv[])
     };
 
     glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-
-    CreateVertexStuff(PlatForm);
     
         // Load and create textures
-    unsigned int texture1, texture2;
-    unsigned int* texture;
-    texture = LoadTexture();
-    texture1 = texture[0];
-    texture2 = texture[1];
-    // printf("Game crash after this texture\n");
-    
+    LoadTexture();
+
     float count = 0.0f;
     float lastFrame = 0.0f;
 
@@ -130,14 +126,10 @@ int main(int* argc, char** argv[])
     float z = 1.0f;
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
-    ourShader->use();
-    lightingShader->use();
     // NOTE: second argument indicate the GLenum texture index that was already initialized
-    ourShader->setInt("texture1", texture1);
-    ourShader->setInt("texture2", texture2);
-
-    delete []texture;
-    texture = nullptr;
+    ourShader->use();
+    ourShader->setInt("texture1", 0);
+    ourShader->setInt("texture2", 1);
     
     int delayTime = 0;
     // render loop
@@ -168,33 +160,58 @@ int main(int* argc, char** argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // bind textures on corresponding texture units
-        BindTexture(GL_TEXTURE0, &texture1);
-        BindTexture(GL_TEXTURE1, &texture2);        
+        // This one seemed fishy
+        
         // activate shader
-        ourShader->use();
+        // Seem like if I use two shader at the same time
+        // The later one will override the previous one 
+        // lightingShader->use();               
         
         // pass projection matrix to shader (note that in this case it could change every frame)
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
         //========================================= 
-        glm::mat4 lightModel = glm::mat4(1.0f);            
         //NOTE: These line create a region of space that appeared on screen
+
+        glm::mat4 lightModel = glm::mat4(1.0f);            
+
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         ourShader->setMat4("projection", projection);
-        lightingShader->setMat4("Lprojection", projection);
+
+        // lightingShader->setMat4("Lprojection", projection);
         
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         ourShader->setMat4("view", view);
-        lightingShader->setMat4("Lview", view);
 
+        // lightingShader->setMat4("Lview", view);
+        // ON WORKING!!: Light Cube construct
+        glm::vec3 lightColor = {0.0f, 1.0f, 0.0f};
+        glm::vec3 toyColor = {1.0f, 0.5f, 0.31f};
+
+        lightingShader->setVec3("ObjectColor", toyColor);
+        lightingShader->setVec3("LightColor", lightColor);
+
+        lightModel = translate(lightModel, lightPos);
+        lightModel = scale(lightModel, glm::vec3(2.0f));
+
+        lightingShader->setMat4("Lmodel", lightModel);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
+
+        // NOTE: For some reason the LightShader overrided the ourShader and clear the whole Scene
+        //===================================================================
+        
         // render boxes        
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
 
+        int MoveCount = 0;
+        int Movingcount = 0;
+        int MCount = 0;
 
         if(deltaTime > (float)(1/30)){            
 
@@ -202,8 +219,9 @@ int main(int* argc, char** argv[])
         currentFrame = lastFrame;
 
         // NOTE: The for loop messed up the rythm of i increment
-        count += ToPositive?0.1f:-0.1f;
-        
+        // Shader lightingShader("lightingSource.vs", "color.fs");
+
+        count += ToPositive?0.1f:-0.1f;        
         if(count > 10.0f){
             ToPositive = false;
         } if ( count < -10.0f){
@@ -227,7 +245,12 @@ int main(int* argc, char** argv[])
             if (i==1 || i==3) {                
             // time += 0.1f;
             model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
-            model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
+            if(Movingcount >= 20){
+                model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
+                Movingcount = 0;
+            }else{
+                Movingcount++;
+            }
             // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
                 
             // printf("Count is :%f\n", count);
@@ -237,11 +260,24 @@ int main(int* argc, char** argv[])
             }
             else if (i==2||i==5||i==9){
                 model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.6f,0.0f,0.0f));
-                model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));                
+
+                if(MoveCount >= 25){
+                    model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
+                    MoveCount = 0;
+                }else{
+                    MoveCount++;
+                }
+
             }
             else{
             model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
-            model = glm::translate(model, count*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));                            
+            if(MCount >= 120){
+                model = glm::translate(model, count*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
+                MCount = 0;
+            }else{
+                MCount++;
+            }
+
             }
             //every third cube rotate
 //            if (i%3==0)
@@ -256,13 +292,7 @@ int main(int* argc, char** argv[])
             // printf("Last Frame time is:%f\n", lastFrame);
             // printf("Frame time is:%f\n", deltaTime);
         }
-        // Shader lightingShader("lightingSource.vs", "color.fs");
 
-        lightModel = translate(lightModel, lightPos);
-        lightModel = scale(lightModel, glm::vec3(2.0f));
-        lightingShader->setMat4("Lmodel", lightModel);
-
-        glDrawArrays(GL_TRIANGLES, 1, 36);        
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(PlatForm->window);
@@ -271,12 +301,11 @@ int main(int* argc, char** argv[])
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &PlatForm->VAO);
-    glDeleteVertexArrays(1, &PlatForm->lightVAO);
     glDeleteBuffers(1, &PlatForm->VBO);
     delete ourShader;
     ourShader = nullptr;
-    delete lightingShader;
-    lightingShader = nullptr;
+    // delete lightingShader;
+    // lightingShader = nullptr;
     delete PlatForm;
     PlatForm = nullptr;
     // glfw: terminate, clearing all previously allocated GLFW resources.
