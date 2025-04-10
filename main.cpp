@@ -138,8 +138,19 @@ int main(int* argc, char** argv[])
     // -----------
     float currentFrame = 0.0f;
     currentFrame = static_cast<float>(glfwGetTime());
+
+    int MoveCount = 0;
+    int PreMoveCount = 0;
+
+    int MovingCount = 0;
+    int PreMovingCount = 0;
+
+    int MCount = 0;
+    int PreMCount = 0;
+
     while (!glfwWindowShouldClose(PlatForm->window))
     {
+        // NOTE: Have to load model inside the game loop
         glm::mat4 lightModel = glm::mat4(1.0f);            
         glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
     
@@ -185,11 +196,11 @@ int main(int* argc, char** argv[])
 
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
-        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
-        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
 
         
         lightingShader->use();
+        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
+        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
         lightingShader->setMat4("view", view);
         lightingShader->setMat4("projection", projection);
         lightingShader->setMat4("model", lightModel);
@@ -203,10 +214,6 @@ int main(int* argc, char** argv[])
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
-
-        int MoveCount = 0;
-        int Movingcount = 0;
-        int MCount = 0;
 
         ourShader->use();
         ourShader->setMat4("projection", projection);
@@ -244,12 +251,25 @@ int main(int* argc, char** argv[])
             if (i==1 || i==3) {                
             // time += 0.1f;
             model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
-            if(Movingcount >= 20){
-                model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
-                Movingcount = 0;
-            }else{
-                Movingcount++;
+            if(MovingCount >= 20 ||  MovingCount <= -20) {
+                if(PreMovingCount >= MovingCount){
+                    if(PreMovingCount != MovingCount){
+                        PreMovingCount = MovingCount;
+                    }
+                    MovingCount++;
+                }else{
+                    if(PreMovingCount != MovingCount){
+                        PreMovingCount = MovingCount;
+                    }
+                    MovingCount--;
+                }
+            } else {
+                if(PreMovingCount != MovingCount){
+                    PreMovingCount = MovingCount;
+                }
+                MovingCount++;
             }
+            model = glm::translate(model, (float)MovingCount*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
             // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
                 
             // printf("Count is :%f\n", count);
@@ -259,24 +279,47 @@ int main(int* argc, char** argv[])
             }
             else if (i==2||i==5||i==9){
                 model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.6f,0.0f,0.0f));
-
-                if(MoveCount >= 25){
-                    model = glm::translate(model, count*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
-                    MoveCount = 0;
-                }else{
+                if(MoveCount >= 25 ||  MoveCount <= -25) {
+                    if(PreMoveCount >= MoveCount){
+                        if(PreMoveCount != MoveCount){
+                            PreMoveCount = MoveCount;
+                        }
+                        MoveCount++;
+                    }else{
+                        if(PreMoveCount != MoveCount){
+                            PreMoveCount = MoveCount;
+                        }
+                        MoveCount--;
+                    }
+                } else {
+                    if(PreMoveCount != MoveCount){
+                        PreMoveCount = MoveCount;
+                    }
                     MoveCount++;
                 }
-
+                model = glm::translate(model, (float)MoveCount*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
             }
             else{
             model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
-            if(MCount >= 120){
-                model = glm::translate(model, count*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
-                MCount = 0;
-            }else{
+            if(MCount >= 25 ||  MCount <= -25) {
+                if(PreMCount >= MCount){
+                    if(PreMCount != MCount){
+                        PreMCount = MCount;
+                    }
+                    MCount++;
+                }else{
+                    if(PreMCount != MCount){
+                        PreMCount = MCount;
+                    }
+                    MCount--;
+                }
+            } else {
+                if(PreMCount != MCount){
+                    PreMCount = MCount;
+                }
                 MCount++;
             }
-
+            model = glm::translate(model, (float)MCount*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
             }
             //every third cube rotate
 //            if (i%3==0)
