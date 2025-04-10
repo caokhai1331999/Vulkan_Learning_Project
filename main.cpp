@@ -78,14 +78,21 @@ int main(int* argc, char** argv[])
         printf("Init platform successfully\n");
     }
 
+    glm::vec3 lightColor = {0.0f, 1.0f, 0.0f};
+    glm::vec3 toyColor = {1.0f, 0.5f, 0.31f};
+
     // NOTE: I have to recall this function to load gl function
     // LoadGLFunctions();        
-    Shader* lightingShader = nullptr;
-    lightingShader = new Shader("lightingSource.vs", "colorS.fs");
-
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
 
+    Shader* lightingShader = nullptr;
+    lightingShader = new Shader("1.color.vs", "1.color.fs");
+    printf("Light Source Shader ID:%d\n", lightingShader->ID);
+    
+    Shader* lightCubeShader = nullptr;
+    lightCubeShader = new Shader("1.LightCube.vs", "1.LightCube.fs");
+    printf("LightCubeShader ID:%d\n", lightCubeShader->ID);
 
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
@@ -112,8 +119,6 @@ int main(int* argc, char** argv[])
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-    glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-    
         // Load and create textures
     LoadTexture();
 
@@ -127,9 +132,6 @@ int main(int* argc, char** argv[])
     // tell opengl for each sampler to which texture unit it belongs to (only has to be done once)
     // -------------------------------------------------------------------------------------------
     // NOTE: second argument indicate the GLenum texture index that was already initialized
-    ourShader->use();
-    ourShader->setInt("texture1", 0);
-    ourShader->setInt("texture2", 1);
     
     int delayTime = 0;
     // render loop
@@ -138,7 +140,9 @@ int main(int* argc, char** argv[])
     currentFrame = static_cast<float>(glfwGetTime());
     while (!glfwWindowShouldClose(PlatForm->window))
     {
-
+        glm::mat4 lightModel = glm::mat4(1.0f);            
+        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+    
         // if(delayTime >= 120){
         //     FreeLibrary(PlatformLibrary);
         //     GetFunction();
@@ -148,11 +152,7 @@ int main(int* argc, char** argv[])
         //     delayTime++;
         // }
 
-        // per-frame time logic
-        // --------------------
-        //Why the lastFrame and currentFrame time gap is so much
-        // input
-        // -----
+
         processInput(PlatForm->window);
 
         // render
@@ -160,14 +160,7 @@ int main(int* argc, char** argv[])
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // This one seemed fishy
         
-        // activate shader
-        // Seem like if I use two shader at the same time
-        // The later one will override the previous one 
-        // lightingShader->use();               
-        
-        // pass projection matrix to shader (note that in this case it could change every frame)
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
@@ -176,29 +169,33 @@ int main(int* argc, char** argv[])
 
 
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        ourShader->setMat4("projection", projection);
-
-        lightingShader->setMat4("Lprojection", projection);
-        
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-        ourShader->setMat4("view", view);
-        lightingShader->setMat4("Lview", view);
-        // ON WORKING!!: Light Cube construct
-        glm::vec3 lightColor = {0.0f, 1.0f, 0.0f};
-        glm::vec3 toyColor = {1.0f, 0.5f, 0.31f};
 
-        glm::mat4 lightModel = glm::mat4(1.0f);            
-        lightModel = translate(lightModel, lightPos);
-        lightModel = scale(lightModel, glm::vec3(2.0f));
+        // ON WORKING!!: Cube drawing
 
-        // lightingShader->use();
-        lightingShader->setMat4("Lmodel", lightModel);
-        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
-        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
+        lightCubeShader->use();
+        lightCubeShader->setMat4("view", view);
+        lightCubeShader->setMat4("projection", projection);
+        lightCubeShader->setMat4("model", lightModel);
+        glBindVertexArray(PlatForm->CubeVAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        // ===========================================================
 
+        lightModel = translate(lightModel, lightPos);
+        lightModel = scale(lightModel, glm::vec3(2.0f));
+        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
+        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
+
+        
+        lightingShader->use();
+        lightingShader->setMat4("view", view);
+        lightingShader->setMat4("projection", projection);
+        lightingShader->setMat4("model", lightModel);
+        glBindVertexArray(PlatForm->LightCubeVAO);
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        glDrawArrays(GL_TRIANGLES, 0, 36);        
         // NOTE: For some reason the LightShader overrided the ourShader and clear the whole Scene
         //===================================================================
         
@@ -210,6 +207,10 @@ int main(int* argc, char** argv[])
         int MoveCount = 0;
         int Movingcount = 0;
         int MCount = 0;
+
+        ourShader->use();
+        ourShader->setMat4("projection", projection);
+        ourShader->setMat4("view", view);
 
         if(deltaTime > (float)(1/30)){            
 
@@ -280,7 +281,11 @@ int main(int* argc, char** argv[])
             //every third cube rotate
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
+            ourShader->use();
+            ourShader->setInt("texture1", 0);
+            ourShader->setInt("texture2", 1);
             ourShader->setMat4("model",model);
+            glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);
 
             lastFrame = static_cast<float>(glfwGetTime());
@@ -299,11 +304,19 @@ int main(int* argc, char** argv[])
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &PlatForm->VAO);
+    glDeleteVertexArrays(1, &PlatForm->CubeVAO);
+    glDeleteVertexArrays(1, &PlatForm->LightCubeVAO);
     glDeleteBuffers(1, &PlatForm->VBO);
+
     delete ourShader;
     ourShader = nullptr;
-    // delete lightingShader;
-    // lightingShader = nullptr;
+
+    delete lightingShader;
+    lightingShader = nullptr;
+
+    delete lightCubeShader;
+    lightCubeShader = nullptr;
+
     delete PlatForm;
     PlatForm = nullptr;
     // glfw: terminate, clearing all previously allocated GLFW resources.

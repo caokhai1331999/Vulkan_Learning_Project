@@ -140,6 +140,50 @@ void CreateVertexStuff(Platform* p)
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    float lightVertices[] = {
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f,  0.5f,
+        -0.5f, -0.5f, -0.5f,
+
+        -0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+         0.5f,  0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f, -0.5f,
+    };
+
     // WORKING!!============================================================
     glGenVertexArrays(1, &p->VAO);
     glGenBuffers(1, &p->VBO);
@@ -156,6 +200,30 @@ void CreateVertexStuff(Platform* p)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
+    // This is for cube and light Cube
+    // NOTE:NO need for texture filling for cube and light one
+    // ==============================================
+    glGenVertexArrays(1, &p->CubeVAO);
+    glGenBuffers(1, &p->LightVBO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, p->LightVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(lightVertices), lightVertices, GL_STATIC_DRAW);
+    glBindVertexArray(p->CubeVAO);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // ==================================================================
+    // NOTE: This is the light source
+    glGenVertexArrays(1, &p->LightCubeVAO);
+    glBindVertexArray(p->LightCubeVAO);
+    // This time just need to bind, cause the LightVBO already have data of verticles
+    glBindBuffer(GL_ARRAY_BUFFER, p->LightVBO);
+    glBindVertexArray(p->LightCubeVAO);
+    // position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    // =====================================================================
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
