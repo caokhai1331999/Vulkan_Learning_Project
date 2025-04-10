@@ -68,7 +68,6 @@ struct Platform{
 
 bool Init(Platform* PlatForm);
 void CreateVertexStuff(Platform* p);
-void BindTexture(const GLenum index, const unsigned int* texture);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);

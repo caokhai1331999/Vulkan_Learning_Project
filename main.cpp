@@ -192,7 +192,7 @@ int main(int* argc, char** argv[])
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
 
-        lightingShader->use();
+        // lightingShader->use();
         lightingShader->setMat4("Lmodel", lightModel);
         lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
         lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
