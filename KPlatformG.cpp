@@ -15,8 +15,8 @@
 //     HINSTANCE hinstDLL,  // handle to DLL module
 //     DWORD fdwReason,     // reason for calling function
 //     LPVOID lpvReserved )  // reserved
-// {
 //     return TRUE;  // Successful DLL_PROCESS_ATTACH.
+// {
 // }
 // #endif
 
@@ -28,18 +28,27 @@
 
 void processInput(GLFWwindow *window)
 {
+
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
     float cameraSpeed = static_cast<float>(2.5 * deltaTime);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+        // cameraPos += cameraSpeed * cameraFront;
         cameraPos += cameraSpeed * cameraFront;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraFront;
+        // cameraPos -= cameraSpeed * cameraFront;
+        cameraPos -= (cameraSpeed * cameraFront);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+        // NOTE: Still don't figure out this
         cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+        cameraPos += cameraSpeed * cameraUp;
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+        cameraPos -= cameraSpeed * cameraUp;
+
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -96,6 +105,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void CreateVertexStuff(Platform* p)
 {
 
+    // NOTE: A cube position with texture position
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
          0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -140,6 +150,7 @@ void CreateVertexStuff(Platform* p)
         -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
     };
 
+    // NOTE: Just a cube with 6 verticles per face postion
     float lightVertices[] = {
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
@@ -210,11 +221,11 @@ void CreateVertexStuff(Platform* p)
     glBufferData(GL_ARRAY_BUFFER, sizeof(lightVertices), lightVertices, GL_STATIC_DRAW);
     glBindVertexArray(p->CubeVAO);
     // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
     // ==================================================================
-    // NOTE: This is the light source
+    // NOTE: This is for the light source
     glGenVertexArrays(1, &p->LightCubeVAO);
     glBindVertexArray(p->LightCubeVAO);
     // This time just need to bind, cause the LightVBO already have data of verticles

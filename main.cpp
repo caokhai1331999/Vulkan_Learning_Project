@@ -78,8 +78,6 @@ int main(int* argc, char** argv[])
         printf("Init platform successfully\n");
     }
 
-    glm::vec3 lightColor = {0.0f, 1.0f, 0.0f};
-    glm::vec3 toyColor = {1.0f, 0.5f, 0.31f};
 
     // NOTE: I have to recall this function to load gl function
     // LoadGLFunctions();        
@@ -87,12 +85,12 @@ int main(int* argc, char** argv[])
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
 
     Shader* lightingShader = nullptr;
-    lightingShader = new Shader("1.color.vs", "1.color.fs");
+    lightingShader = new Shader("1.LightCube.vs", "1.LightCube.fs");
     printf("Light Source Shader ID:%d\n", lightingShader->ID);
     
-    Shader* lightCubeShader = nullptr;
-    lightCubeShader = new Shader("1.LightCube.vs", "1.LightCube.fs");
-    printf("LightCubeShader ID:%d\n", lightCubeShader->ID);
+    Shader* lightedCubeShader = nullptr;
+    lightedCubeShader = new Shader("1.color.vs", "1.color.fs");
+    printf("LightCubeShader ID:%d\n", lightedCubeShader->ID);
 
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
@@ -152,8 +150,9 @@ int main(int* argc, char** argv[])
     {
         // NOTE: Have to load model inside the game loop
         glm::mat4 lightModel = glm::mat4(1.0f);            
-        glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-    
+        glm::mat4 cubeModel = glm::mat4(1.0f);            
+        glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
+
         // if(delayTime >= 120){
         //     FreeLibrary(PlatformLibrary);
         //     GetFunction();
@@ -165,7 +164,6 @@ int main(int* argc, char** argv[])
 
 
         processInput(PlatForm->window);
-
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -185,22 +183,10 @@ int main(int* argc, char** argv[])
 
         // ON WORKING!!: Cube drawing
 
-        lightCubeShader->use();
-        lightCubeShader->setMat4("view", view);
-        lightCubeShader->setMat4("projection", projection);
-        lightCubeShader->setMat4("model", lightModel);
-        glBindVertexArray(PlatForm->CubeVAO);
-        // Draw a cube here (6 per face we have 6 faces so 36 indices)
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        // ===========================================================
-
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
-
         
         lightingShader->use();
-        lightingShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
-        lightingShader->setVec3("LightColor", {0.0f, 1.0f, 0.0f});
         lightingShader->setMat4("view", view);
         lightingShader->setMat4("projection", projection);
         lightingShader->setMat4("model", lightModel);
@@ -208,7 +194,21 @@ int main(int* argc, char** argv[])
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);        
         // NOTE: For some reason the LightShader overrided the ourShader and clear the whole Scene
+        // FIXED: We have to bind to shader to appropriate VAO before drawing something
         //===================================================================
+
+        lightedCubeShader->use();
+        lightedCubeShader->setVec3("LightColor", glm::vec4(1.0f));
+        lightedCubeShader->setVec3("ObjectColor", {0.94f, 0.776f, 0.435f});
+        lightedCubeShader->setMat4("view", view);
+        lightedCubeShader->setMat4("projection", projection);
+
+        cubeModel = translate(cubeModel, lightPos + static_cast<float >(2.5)*glm::vec3(0.0, 0.0, 1.0));
+        lightedCubeShader->setMat4("model", cubeModel);
+        glBindVertexArray(PlatForm->CubeVAO);
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        // ===========================================================
         
         // render boxes        
         x = 1.0f;
@@ -357,8 +357,8 @@ int main(int* argc, char** argv[])
     delete lightingShader;
     lightingShader = nullptr;
 
-    delete lightCubeShader;
-    lightCubeShader = nullptr;
+    delete lightedCubeShader;
+    lightedCubeShader = nullptr;
 
     delete PlatForm;
     PlatForm = nullptr;
