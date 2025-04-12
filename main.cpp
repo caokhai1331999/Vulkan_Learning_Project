@@ -84,13 +84,13 @@ int main(int* argc, char** argv[])
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
 
-    Shader* lightingShader = nullptr;
-    lightingShader = new Shader("1.LightCube.vs", "1.LightCube.fs");
-    printf("Light Source Shader ID:%d\n", lightingShader->ID);
+    Shader* lampShader = nullptr;
+    lampShader = new Shader("1.lamp.vs", "1.lamp.fs");
+    printf("Lamp Shader ID:%d\n", lampShader->ID);
     
-    Shader* lightedCubeShader = nullptr;
-    lightedCubeShader = new Shader("1.color.vs", "1.color.fs");
-    printf("LightCubeShader ID:%d\n", lightedCubeShader->ID);
+    Shader* objectShader = nullptr;
+    objectShader = new Shader("1.object.vs", "1.object.fs");
+    printf("Lighted object ID:%d\n", objectShader->ID);
 
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
@@ -186,10 +186,10 @@ int main(int* argc, char** argv[])
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
         
-        lightingShader->use();
-        lightingShader->setMat4("view", view);
-        lightingShader->setMat4("projection", projection);
-        lightingShader->setMat4("model", lightModel);
+        lampShader->use();
+        lampShader->setMat4("view", view);
+        lampShader->setMat4("projection", projection);
+        lampShader->setMat4("model", lightModel);
         glBindVertexArray(PlatForm->LightCubeVAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);        
@@ -197,14 +197,19 @@ int main(int* argc, char** argv[])
         // FIXED: We have to bind to shader to appropriate VAO before drawing something
         //===================================================================
 
-        lightedCubeShader->use();
-        lightedCubeShader->setVec3("LightColor", glm::vec4(1.0f));
-        lightedCubeShader->setVec3("ObjectColor", {0.94f, 0.776f, 0.435f});
-        lightedCubeShader->setMat4("view", view);
-        lightedCubeShader->setMat4("projection", projection);
+        objectShader->use();
 
-        cubeModel = translate(cubeModel, lightPos + static_cast<float >(2.5)*glm::vec3(0.0, 0.0, 1.0));
-        lightedCubeShader->setMat4("model", cubeModel);
+        cubeModel = translate(cubeModel, lightPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
+
+        objectShader->setVec3("LightPos", lightPos);
+        objectShader->setMat4("view", view);
+        objectShader->setMat4("projection", projection);
+        objectShader->setMat4("model", cubeModel);
+        
+        // objectShader->setVec3("ObjectColor", {0.94f, 0.776f, 0.435f});
+        objectShader->setVec3("lightColor", glm::vec4(1.0f));
+        objectShader->setVec3("ObjectColor", {1.0f, 0.5f, 0.31f});
+
         glBindVertexArray(PlatForm->CubeVAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -225,7 +230,7 @@ int main(int* argc, char** argv[])
         currentFrame = lastFrame;
 
         // NOTE: The for loop messed up the rythm of i increment
-        // Shader lightingShader("lightingSource.vs", "color.fs");
+        // Shader lampShader("lightingSource.vs", "color.fs");
 
         count += ToPositive?0.1f:-0.1f;        
         if(count > 10.0f){
@@ -354,11 +359,11 @@ int main(int* argc, char** argv[])
     delete ourShader;
     ourShader = nullptr;
 
-    delete lightingShader;
-    lightingShader = nullptr;
+    delete lampShader;
+    lampShader = nullptr;
 
-    delete lightedCubeShader;
-    lightedCubeShader = nullptr;
+    delete objectShader;
+    objectShader = nullptr;
 
     delete PlatForm;
     PlatForm = nullptr;
