@@ -116,6 +116,7 @@ int main(int* argc, char** argv[])
     // world space positions of our cubes
 
     CreateVertexStuff(PlatForm);
+    
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
         glm::vec3( 2.0f,  5.0f, -15.0f),
@@ -247,7 +248,7 @@ int main(int* argc, char** argv[])
 
         objectShader->setVec3("light.ambient", ambientColor);
         objectShader->setVec3("light.diffuse", diffuseColor);        
-        
+
         glBindVertexArray(PlatForm->CubeVAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
