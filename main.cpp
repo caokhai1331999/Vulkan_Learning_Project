@@ -133,6 +133,10 @@ int main(int* argc, char** argv[])
         // Load and create textures
     LoadTexture();
 
+    objectShader->use();
+    // Sampler2D is the texture value
+    objectShader->setInt("material.diffuse", 2);
+
     float count = 0.0f;
     float lastFrame = 0.0f;
 
@@ -190,87 +194,105 @@ int main(int* argc, char** argv[])
         //========================================= 
         //NOTE: These line create a region of space that appeared on screen
 
-
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         // camera/view transformation
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
+        // ====================================================================
         // ON WORKING!!: Cube drawing
 
-
+        // Variate Light Pos
         lightPos.x += 5.0f *(1.0f + sin(glfwGetTime()) * 2.0f)* LampMovingSpeed;
         lightPos.y += 5.0f *(cos(glfwGetTime())*1.5f + 1.5f)* LampMovingSpeed;
         lightPos.z += 5.0f *(cos(glfwGetTime())*2.0f + 1.5f)* LampMovingSpeed;
+        // =======================
 
+        // Move Model
         lightModel = translate(lightModel, lightPos);
         lightModel = scale(lightModel, glm::vec3(2.0f));
+        // ================================
 
-        
+        // Variate Light Color
         glm::vec3 lightColor;
         lightColor.x = sin(glfwGetTime()* 2.0f);
         lightColor.y = sin(glfwGetTime()* 0.7f);
         lightColor.z = sin(glfwGetTime()* 1.3f);
-        
-        lampShader->use();
+        // ================================
 
+        // NOTE: Draw Lamp
+        lampShader->use();
         lampShader->setMat4("view", view);
         lampShader->setMat4("projection", projection);
         lampShader->setMat4("model", lightModel);
         lampShader->setVec3("lightColor", lightColor);
-        glBindVertexArray(PlatForm->LightCubeVAO);
+        glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);        
-        // NOTE: For some reason the LightShader overrided the ourShader and clear the whole Scene
+        // ================================================================
+        
         // FIXED: We have to bind to shader to appropriate VAO before drawing something
         //===================================================================
+        // NOTE: Calculate ambient and diffuse based on light Color
+        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
+        // ==================================================================
 
+        // Set General Model spec for two object cubes
         objectShader->use();
 
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
-
         objectShader->setVec3("viewPos", cameraPos);
         objectShader->setMat4("view", view);
         objectShader->setMat4("projection", projection);
-
         objectShader->setMat4("model", cubeModel);
+        // ==================================================================
 
-        objectShader->setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        objectShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-        objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
+        // objectShader->setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
+        // objectShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
+        
+        // Set light color and position for one cube
+        objectShader->setInt("material.diffuseMap", 2);
+        objectShader->setInt("material.specularMap", 4);
+        objectShader->setInt("material.emissionMap", 3);
+
+        // objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         objectShader->setFloat("material.shininess", 32.0f);
 
-
         objectShader->setVec3("light.position", lightPos);
-        objectShader->setVec3("light.specular", 1.0f, 1.0f, 1.0f);
-
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
-        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
-
-        objectShader->setVec3("light.ambient", ambientColor);
-        objectShader->setVec3("light.diffuse", diffuseColor);        
-
-        glBindVertexArray(PlatForm->CubeVAO);
+        // objectShader->setVec3("light.ambient", ambientColor);
+        // objectShader->setVec3("light.diffuse", diffuseColor);        
+        objectShader->setVec3("light.ambient", glm::vec3(0.2f));
+        objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
+        objectShader->setVec3("light.specular",glm::vec3(1.0f));
+        glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+        // Then Move the model to different Position
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
+        objectShader->use();
+        // Bind Texture to shader
+        objectShader->setInt("material.diffuseTexture", 2);
         objectShader->setMat4("model", cubeModel);
-        glBindVertexArray(PlatForm->CubeVAO);
+        glBindVertexArray(PlatForm->VAO);
+        // Then Draw it out
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
+
+        // =====================================================================
         // CYAN PLASTIC ONE
         objectShader->setVec3("light.ambient", glm::vec3(1.0f));
-        objectShader->setVec3("light.diffuse", glm::vec3(1.0f));        
-        
+        objectShader->setVec3("light.diffuse", glm::vec3(1.0f));                
         objectShader->setVec3("material.ambient", glm::vec3(cyan_plastic.ambient * glm::vec3(1.0f)));
         objectShader->setVec3("material.diffuse", cyan_plastic.diffuse);
         objectShader->setVec3("material.specular", cyan_plastic.specular);
         objectShader->setFloat("material.shininess", cyan_plastic.shininess);        
         
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 1.0, -1.0)); // NOTE: The vector position is x,y,z
+        objectShader->setInt("material.diffuse", 2);
         objectShader->setMat4("model", cubeModel);
-        glBindVertexArray(PlatForm->CubeVAO);
+        glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -413,8 +435,6 @@ int main(int* argc, char** argv[])
     // optional: de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     glDeleteVertexArrays(1, &PlatForm->VAO);
-    glDeleteVertexArrays(1, &PlatForm->CubeVAO);
-    glDeleteVertexArrays(1, &PlatForm->LightCubeVAO);
     glDeleteBuffers(1, &PlatForm->VBO);
 
     delete ourShader;
