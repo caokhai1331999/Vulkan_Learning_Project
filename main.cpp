@@ -39,12 +39,6 @@ struct Material{
     float shininess;    
 };
 
-void LoadGLFunctions() {
-    if (!gladLoadGL()) {
-        std::cerr << "Failed to load OpenGL!" << std::endl;
-    }
-}
-
 
 void GetFunction(){
 
@@ -131,12 +125,25 @@ int main(int* argc, char** argv[])
     };
 
         // Load and create textures
-    LoadTexture();
-
+    unsigned int* textures  = nullptr;
+    textures = new unsigned int();
+    // textures = LoadTexture();
+    textures = LoadTexture();
+    
     objectShader->use();
     // Sampler2D is the texture value
-    objectShader->setInt("material.diffuse", 2);
+    // Why when I change the specular map from texture 4 the texture 3
+    // The texture 3 was shown above texture 4
+    // Why shader put emission layer on top
+    objectShader->setInt("material.emissionMap", 4);
+    objectShader->setInt("material.diffuseMap", 2);
+    objectShader->setInt("material.specularMap", 3);
 
+    for(int i = 0; i < 5; i++){
+        printf("Texture index %d: %d\n", i, textures[i]);
+    }
+
+    
     float count = 0.0f;
     float lastFrame = 0.0f;
 
@@ -251,19 +258,18 @@ int main(int* argc, char** argv[])
         // objectShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
         
         // Set light color and position for one cube
-        objectShader->setInt("material.diffuseMap", 2);
-        objectShader->setInt("material.specularMap", 4);
-        objectShader->setInt("material.emissionMap", 3);
 
         // objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-        objectShader->setFloat("material.shininess", 32.0f);
+        objectShader->setFloat("material.shininess", 64.0f);
 
         objectShader->setVec3("light.position", lightPos);
         // objectShader->setVec3("light.ambient", ambientColor);
         // objectShader->setVec3("light.diffuse", diffuseColor);        
+
         objectShader->setVec3("light.ambient", glm::vec3(0.2f));
         objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
         objectShader->setVec3("light.specular",glm::vec3(1.0f));
+        
         glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -272,8 +278,8 @@ int main(int* argc, char** argv[])
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
         objectShader->use();
         // Bind Texture to shader
-        objectShader->setInt("material.diffuseTexture", 2);
         objectShader->setMat4("model", cubeModel);
+
         glBindVertexArray(PlatForm->VAO);
         // Then Draw it out
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
@@ -285,12 +291,12 @@ int main(int* argc, char** argv[])
         objectShader->setVec3("light.ambient", glm::vec3(1.0f));
         objectShader->setVec3("light.diffuse", glm::vec3(1.0f));                
         objectShader->setVec3("material.ambient", glm::vec3(cyan_plastic.ambient * glm::vec3(1.0f)));
+
         objectShader->setVec3("material.diffuse", cyan_plastic.diffuse);
         objectShader->setVec3("material.specular", cyan_plastic.specular);
         objectShader->setFloat("material.shininess", cyan_plastic.shininess);        
         
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 1.0, -1.0)); // NOTE: The vector position is x,y,z
-        objectShader->setInt("material.diffuse", 2);
         objectShader->setMat4("model", cubeModel);
         glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
@@ -310,17 +316,17 @@ int main(int* argc, char** argv[])
         if(deltaTime > (float)(1/30)){            
 
             // Update frame whenever it meet the condition
-        currentFrame = lastFrame;
+            currentFrame = lastFrame;
 
-        // NOTE: The for loop messed up the rythm of i increment
-        // Shader lampShader("lightingSource.vs", "color.fs");
+            // NOTE: The for loop messed up the rythm of i increment
+            // Shader lampShader("lightingSource.vs", "color.fs");
 
-        count += ToPositive?0.1f:-0.1f;        
-        if(count > 10.0f){
-            ToPositive = false;
-        } if ( count < -10.0f){
-            ToPositive = true;
-        }
+            count += ToPositive?0.1f:-0.1f;        
+            if(count > 10.0f){
+                ToPositive = false;
+            } if ( count < -10.0f){
+                ToPositive = true;
+            }
         
         }
 
@@ -337,33 +343,33 @@ int main(int* argc, char** argv[])
             model = glm::rotate(model,glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
 
             if (i==1 || i==3) {                
-            // time += 0.1f;
-            model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
-            if(MovingCount >= 20 ||  MovingCount <= -20) {
-                if(PreMovingCount >= MovingCount){
+                // time += 0.1f;
+                model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
+                if(MovingCount >= 20 ||  MovingCount <= -20) {
+                    if(PreMovingCount >= MovingCount){
+                        if(PreMovingCount != MovingCount){
+                            PreMovingCount = MovingCount;
+                        }
+                        MovingCount++;
+                    }else{
+                        if(PreMovingCount != MovingCount){
+                            PreMovingCount = MovingCount;
+                        }
+                        MovingCount--;
+                    }
+                } else {
                     if(PreMovingCount != MovingCount){
                         PreMovingCount = MovingCount;
                     }
                     MovingCount++;
-                }else{
-                    if(PreMovingCount != MovingCount){
-                        PreMovingCount = MovingCount;
-                    }
-                    MovingCount--;
                 }
-            } else {
-                if(PreMovingCount != MovingCount){
-                    PreMovingCount = MovingCount;
-                }
-                MovingCount++;
-            }
-            model = glm::translate(model, (float)MovingCount*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
-            // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
+                model = glm::translate(model, (float)MovingCount*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
+                // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
                 
-            // printf("Count is :%f\n", count);
+                // printf("Count is :%f\n", count);
 
-            // NOTE: translate is to move he thing
-            // printf("Current time is: %f \n", glfwGetTime());
+                // NOTE: translate is to move he thing
+                // printf("Current time is: %f \n", glfwGetTime());
             }
             else if (i==2||i==5||i==9){
                 model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.6f,0.0f,0.0f));
@@ -388,26 +394,26 @@ int main(int* argc, char** argv[])
                 model = glm::translate(model, (float)MoveCount*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
             }
             else{
-            model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
-            if(MCount >= 25 ||  MCount <= -25) {
-                if(PreMCount >= MCount){
+                model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
+                if(MCount >= 25 ||  MCount <= -25) {
+                    if(PreMCount >= MCount){
+                        if(PreMCount != MCount){
+                            PreMCount = MCount;
+                        }
+                        MCount++;
+                    }else{
+                        if(PreMCount != MCount){
+                            PreMCount = MCount;
+                        }
+                        MCount--;
+                    }
+                } else {
                     if(PreMCount != MCount){
                         PreMCount = MCount;
                     }
                     MCount++;
-                }else{
-                    if(PreMCount != MCount){
-                        PreMCount = MCount;
-                    }
-                    MCount--;
                 }
-            } else {
-                if(PreMCount != MCount){
-                    PreMCount = MCount;
-                }
-                MCount++;
-            }
-            model = glm::translate(model, (float)MCount*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
+                model = glm::translate(model, (float)MCount*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
             }
             //every third cube rotate
 //            if (i%3==0)
@@ -448,6 +454,10 @@ int main(int* argc, char** argv[])
 
     delete PlatForm;
     PlatForm = nullptr;
+
+    delete textures;
+    textures = nullptr;
+
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
