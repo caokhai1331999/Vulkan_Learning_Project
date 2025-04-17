@@ -139,6 +139,11 @@ int main(int* argc, char** argv[])
     objectShader->setInt("material.diffuseMap", 2);
     objectShader->setInt("material.specularMap", 3);
 
+    objectShader->setFloat("light.constant",  1.0f);
+    objectShader->setFloat("light.linear",    0.09f);
+    objectShader->setFloat("light.quadratic", 0.032f);	    
+    
+    
     for(int i = 0; i < 5; i++){
         printf("Texture index %d: %d\n", i, textures[i]);
     }
@@ -170,12 +175,13 @@ int main(int* argc, char** argv[])
     int MCount = 0;
     int PreMCount = 0;
 
+    glm::vec3 lightPos = glm::vec3(1.0f, 0.0f, 5.0f);
+
     while (!glfwWindowShouldClose(PlatForm->window))
     {
         // NOTE: Have to load model inside the game loop
         glm::mat4 lightModel = glm::mat4(1.0f);            
         glm::mat4 cubeModel = glm::mat4(1.0f);            
-        glm::vec3 lightPos = glm::vec3(1.2f, 1.0f, 2.0f);
         glm::vec3 objectPos = glm::vec3(1.2f, 1.0f, 2.0f);
 
         // if(delayTime >= 120){
@@ -209,9 +215,9 @@ int main(int* argc, char** argv[])
         // ON WORKING!!: Cube drawing
 
         // Variate Light Pos
-        lightPos.x += 5.0f *(1.0f + sin(glfwGetTime()) * 2.0f)* LampMovingSpeed;
-        lightPos.y += 5.0f *(cos(glfwGetTime())*1.5f + 1.5f)* LampMovingSpeed;
-        lightPos.z += 5.0f *(cos(glfwGetTime())*2.0f + 1.5f)* LampMovingSpeed;
+        // lightPos.x += 5.0f *(sin(glfwGetTime())* 2.0f + 1.0f)* LampMovingSpeed;
+        // lightPos.y += 5.0f *(sin(glfwGetTime())* 1.5f + 1.5f)* LampMovingSpeed;
+        // lightPos.z += 5.0f *(sin(glfwGetTime())* 2.0f + 1.5f)* LampMovingSpeed;
         // =======================
 
         // Move Model
@@ -248,7 +254,8 @@ int main(int* argc, char** argv[])
         objectShader->use();
 
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
-        objectShader->setVec3("viewPos", cameraPos);
+
+        objectShader->setVec3("ViewPos", cameraPos);
         objectShader->setMat4("view", view);
         objectShader->setMat4("projection", projection);
         objectShader->setMat4("model", cubeModel);
@@ -258,11 +265,11 @@ int main(int* argc, char** argv[])
         // objectShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
         
         // Set light color and position for one cube
-
         // objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-        objectShader->setFloat("material.shininess", 64.0f);
-
+        objectShader->setFloat("material.shininess", 20.0f);
+        // objectShader->setVec3("light.direction", {1.0f, 0.3f, 0.5f});
         objectShader->setVec3("light.position", lightPos);
+
         // objectShader->setVec3("light.ambient", ambientColor);
         // objectShader->setVec3("light.diffuse", diffuseColor);        
 
@@ -309,9 +316,9 @@ int main(int* argc, char** argv[])
         y = 1.0f;
         z = 1.0f;
 
-        ourShader->use();
-        ourShader->setMat4("projection", projection);
-        ourShader->setMat4("view", view);
+        // ourShader->use();
+        // ourShader->setMat4("projection", projection);
+        // ourShader->setMat4("view", view);
 
         if(deltaTime > (float)(1/30)){            
 
@@ -344,26 +351,8 @@ int main(int* argc, char** argv[])
 
             if (i==1 || i==3) {                
                 // time += 0.1f;
-                model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
-                if(MovingCount >= 20 ||  MovingCount <= -20) {
-                    if(PreMovingCount >= MovingCount){
-                        if(PreMovingCount != MovingCount){
-                            PreMovingCount = MovingCount;
-                        }
-                        MovingCount++;
-                    }else{
-                        if(PreMovingCount != MovingCount){
-                            PreMovingCount = MovingCount;
-                        }
-                        MovingCount--;
-                    }
-                } else {
-                    if(PreMovingCount != MovingCount){
-                        PreMovingCount = MovingCount;
-                    }
-                    MovingCount++;
-                }
-                model = glm::translate(model, (float)MovingCount*glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
+                model = glm::rotate(model,(float)sin(glfwGetTime())*glm::radians(50.0f),glm::vec3(0.0f,1.0f,1.0f));
+                model = glm::translate(model, (float)sin(glfwGetTime())* (3.0f) *glm::vec3(0.3f*x, 0.3f*y, 0.3f*z));
                 // printf("lastFrame is: %f, CurrentTime is: %f\n", StandardFrame, currentFrame);
                 
                 // printf("Count is :%f\n", count);
@@ -372,59 +361,28 @@ int main(int* argc, char** argv[])
                 // printf("Current time is: %f \n", glfwGetTime());
             }
             else if (i==2||i==5||i==9){
-                model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(0.6f,0.0f,0.0f));
-                if(MoveCount >= 25 ||  MoveCount <= -25) {
-                    if(PreMoveCount >= MoveCount){
-                        if(PreMoveCount != MoveCount){
-                            PreMoveCount = MoveCount;
-                        }
-                        MoveCount++;
-                    }else{
-                        if(PreMoveCount != MoveCount){
-                            PreMoveCount = MoveCount;
-                        }
-                        MoveCount--;
-                    }
-                } else {
-                    if(PreMoveCount != MoveCount){
-                        PreMoveCount = MoveCount;
-                    }
-                    MoveCount++;
-                }
-                model = glm::translate(model, (float)MoveCount*glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
+                model = glm::rotate(model,(float)sin(glfwGetTime())*glm::radians(50.0f),glm::vec3(0.6f,0.0f,0.0f));
+                model = glm::translate(model, (float)cos(glfwGetTime())* (3.0f) * glm::vec3(0.3f*x, 0.3f*(-y), 0.3f*z));
             }
             else{
                 model = glm::rotate(model,(float)glfwGetTime()*glm::radians(50.0f),glm::vec3(1.0f,0.0f,1.0f));
-                if(MCount >= 25 ||  MCount <= -25) {
-                    if(PreMCount >= MCount){
-                        if(PreMCount != MCount){
-                            PreMCount = MCount;
-                        }
-                        MCount++;
-                    }else{
-                        if(PreMCount != MCount){
-                            PreMCount = MCount;
-                        }
-                        MCount--;
-                    }
-                } else {
-                    if(PreMCount != MCount){
-                        PreMCount = MCount;
-                    }
-                    MCount++;
-                }
-                model = glm::translate(model, (float)MCount*glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
+                model = glm::translate(model, (float)(sin(glfwGetTime()) + cos(glfwGetTime())) * (3.0f) * glm::vec3(0.3f*(-x), 0.3f*(-y), 0.3f*(-z)));
             }
-            //every third cube rotate
+                        //every third cube rotate
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
-            ourShader->use();
-            ourShader->setInt("texture1", 0);
-            ourShader->setInt("texture2", 1);
-            ourShader->setMat4("model",model);
+            // ourShader->use();
+            // ourShader->setInt("texture1", 0);
+            // ourShader->setInt("texture2", 1);
+            // ourShader->setMat4("model",model);
+            objectShader->use();
+            objectShader->setVec3("light.ambient", glm::vec3(0.2f));
+            objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
+            objectShader->setFloat("material.shininess", 50.0f);        
+            ourShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);
-
+            
             lastFrame = static_cast<float>(glfwGetTime());
             deltaTime = lastFrame - currentFrame;
 
