@@ -209,7 +209,7 @@ int main(int* argc, char** argv[])
 
         glm::mat4 projection = glm::perspective(glm::radians(fov), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         // camera/view transformation
-        glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view = glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
 
         // ====================================================================
         // ON WORKING!!: Cube drawing
@@ -255,7 +255,7 @@ int main(int* argc, char** argv[])
 
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
 
-        objectShader->setVec3("ViewPos", cameraPos);
+        objectShader->setVec3("ViewPos", camera.Position);
         objectShader->setMat4("view", view);
         objectShader->setMat4("projection", projection);
         objectShader->setMat4("model", cubeModel);
@@ -267,8 +267,24 @@ int main(int* argc, char** argv[])
         // Set light color and position for one cube
         // objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
         objectShader->setFloat("material.shininess", 20.0f);
-        // objectShader->setVec3("light.direction", {1.0f, 0.3f, 0.5f});
+
+        // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
+        // objectShader->setVec3("light.direction",  -0.2f, -1.0f, -0.3f);
+
+        // FOR THE MY MOST INTERESTING TYPE (POINT LIGHT)
         objectShader->setVec3("light.position", lightPos);
+
+        objectShader->setFloat("light.constant", 1.0f);
+        objectShader->setFloat("light.linearTerm", 0.09f);
+        objectShader->setFloat("light.quadraticTerm", 0.032f);
+        
+        // FOR SPOTLIGHT
+        // objectShader->setVec3("light.position", camera.Position);
+        // objectShader->setVec3("light.direction", camera.Front);
+
+
+        objectShader->setFloat("light.cutOff", glm::cos(glm::radians(40.0f)));
+        objectShader->setFloat("light.outerCutOff", glm::cos(glm::radians(42.5f)));
 
         // objectShader->setVec3("light.ambient", ambientColor);
         // objectShader->setVec3("light.diffuse", diffuseColor);        
@@ -345,7 +361,7 @@ int main(int* argc, char** argv[])
             // Don't understand this step
             model = glm::translate(model,cubePositions[i]);
             float angle = 50.0f;
-            // These lines for moving cubes
+            // These linears for moving cubes
 
             model = glm::rotate(model,glm::radians(angle),glm::vec3(1.0f,0.3f,0.5f));
 
@@ -378,7 +394,7 @@ int main(int* argc, char** argv[])
             objectShader->use();
             objectShader->setVec3("light.ambient", glm::vec3(0.2f));
             objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
-            objectShader->setFloat("material.shininess", 50.0f);        
+            objectShader->setFloat("material.shininess", 25.0f);        
             ourShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);

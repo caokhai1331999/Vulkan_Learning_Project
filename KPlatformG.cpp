@@ -35,20 +35,21 @@ void processInput(GLFWwindow *window)
     float cameraSpeed = static_cast<float>(2.5 * deltaTime);
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         // cameraPos += cameraSpeed * cameraFront;
-        cameraPos += cameraSpeed * cameraFront;
+        camera.Position += cameraSpeed * camera.Front;
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        // cameraPos -= cameraSpeed * cameraFront;
-        cameraPos -= (cameraSpeed * cameraFront);
+        // camera.Pos -= camera.Speed * camera.Front;
+        camera.Position -= (cameraSpeed * camera.Front);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         // NOTE: Still don't figure out this
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.Position -= glm::normalize(glm::cross(camera.Front, camera.Up)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        camera.Position += glm::normalize(glm::cross(camera.Front, camera.Up)) * cameraSpeed;
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        cameraPos += cameraSpeed * cameraUp;
+        camera.Position += cameraSpeed * camera.Up;
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        cameraPos -= cameraSpeed * cameraUp;
+        camera.Position -= cameraSpeed * camera.Up;
 
+    
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -85,21 +86,21 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
-    yaw += xoffset;
-    pitch += yoffset;
+    camera.Yaw += xoffset;
+    camera.Pitch += yoffset;
 
     // make sure that when pitch is out of bounds, screen doesn't get flipped
-    if (pitch > 89.0f)
-        pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
+    if (camera.Pitch > 89.0f)
+        camera.Pitch = 89.0f;
+    if (camera.Pitch < -89.0f)
+        camera.Pitch = -89.0f;
 
     glm::vec3 front;
 
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    cameraFront = glm::normalize(front);
+    front.x = cos(glm::radians(camera.Yaw)) * cos(glm::radians(camera.Pitch));
+    front.y = sin(glm::radians(camera.Pitch));
+    front.z = sin(glm::radians(camera.Yaw)) * cos(glm::radians(camera.Pitch));
+    camera.Front = glm::normalize(front);
 }
 
 void CreateVertexStuff(Platform* p)
