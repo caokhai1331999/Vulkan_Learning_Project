@@ -110,6 +110,8 @@ int main(int* argc, char** argv[])
     // world space positions of our cubes
 
     CreateVertexStuff(PlatForm);
+
+    int index = 0;
     
     glm::vec3 cubePositions[] = {
         glm::vec3( 0.0f,  0.0f,  0.0f),
@@ -124,25 +126,72 @@ int main(int* argc, char** argv[])
         glm::vec3(-1.3f,  1.0f, -1.5f)
     };
 
-        // Load and create textures
+    glm::vec3 pointLightPositions[] = {
+        glm::vec3( 0.7f,  0.2f,  2.0f),
+        glm::vec3( 2.3f, -3.3f, -4.0f),
+        glm::vec3(-4.0f,  2.0f, -12.0f),
+        glm::vec3( 0.0f,  0.0f, -3.0f)
+    };  
+
+    glm::vec3 lightColor[] = {
+        glm::vec3( 1.0f,  0.588f,  0.29f),
+        glm::vec3( 1.0f, 1.0f, 1.0f),
+        glm::vec3(0.698f, 1.0f, 0.29f),
+        glm::vec3( 0.549f, 0.29f, 1.0f)
+    };  
+    
+    // Load and create textures
     unsigned int* textures  = nullptr;
     textures = new unsigned int();
     // textures = LoadTexture();
-    textures = LoadTexture();
-    
+    textures = LoadTexture();    
     objectShader->use();
-    // Sampler2D is the texture value
-    // Why when I change the specular map from texture 4 the texture 3
-    // The texture 3 was shown above texture 4
-    // Why shader put emission layer on top
+
     objectShader->setInt("material.emissionMap", 4);
     objectShader->setInt("material.diffuseMap", 2);
     objectShader->setInt("material.specularMap", 3);
 
-    objectShader->setFloat("light.constant",  1.0f);
-    objectShader->setFloat("light.linear",    0.09f);
-    objectShader->setFloat("light.quadratic", 0.032f);	    
+    objectShader->setVec3("pointlights[0].position",  pointLightPositions[0]);
+    objectShader->setVec3("pointlights[0].ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("pointlights[0].diffuse", 0.8f, 0.8f, 0.8f);
+    objectShader->setVec3("pointlights[0].specular", 1.0f, 1.0f, 1.0f);
+    objectShader->setFloat("pointlights[0].constant",  1.0f);
+    objectShader->setFloat("pointlights[0].linear",    0.09f);
+    objectShader->setFloat("pointlights[0].quadratic", 0.032f);	    
+
+    objectShader->setVec3("pointlights[1].position",  pointLightPositions[1]);
+    objectShader->setVec3("pointlights[1].ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("pointlights[1].diffuse", 0.8f, 0.8f, 0.8f);
+    objectShader->setVec3("pointlights[1].specular", 1.0f, 1.0f, 1.0f);
+    objectShader->setFloat("pointlights[1].constant",  1.0f);
+    objectShader->setFloat("pointlights[1].linear",    0.09f);
+    objectShader->setFloat("pointlights[1].quadratic", 0.032f);	    
+
+    objectShader->setVec3("pointlights[2].position",  pointLightPositions[2]);
+    objectShader->setVec3("pointlights[2].ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("pointlights[2].diffuse", 0.8f, 0.8f, 0.8f);
+    objectShader->setVec3("pointlights[2].specular", 1.0f, 1.0f, 1.0f);
+    objectShader->setFloat("pointlights[2].constant",  1.0f);
+    objectShader->setFloat("pointlights[2].linear",    0.09f);
+    objectShader->setFloat("pointlights[2].quadratic", 0.032f);	    
+
+    objectShader->setVec3("pointlights[3].position",  pointLightPositions[3]);
+    objectShader->setVec3("pointlights[3].ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("pointlights[3].diffuse", 0.8f, 0.8f, 0.8f);
+    objectShader->setVec3("pointlights[3].specular", 1.0f, 1.0f, 1.0f);
+    objectShader->setFloat("pointlights[3].constant",  1.0f);
+    objectShader->setFloat("pointlights[3].linear",    0.09f);
+    objectShader->setFloat("pointlights[3].quadratic", 0.032f);	    
     
+
+    // Set light color and position for one cube
+    objectShader->setFloat("material.shininess", 20.0f);
+
+    // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
+    objectShader->setVec3("dirlight.direction",  -0.2f, -1.0f, -0.3f);
+    objectShader->setVec3("dirlight.ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("dirlight.diffuse", 0.4f, 0.4f, 0.4f);
+    objectShader->setVec3("dirlight.specular", 0.5f, 0.5f, 0.5f);    
     
     for(int i = 0; i < 5; i++){
         printf("Texture index %d: %d\n", i, textures[i]);
@@ -175,14 +224,15 @@ int main(int* argc, char** argv[])
     int MCount = 0;
     int PreMCount = 0;
 
+    glm::vec3 objectPos = glm::vec3(1.2f, 1.0f, 2.0f);
     glm::vec3 lightPos = glm::vec3(1.0f, 0.0f, 5.0f);
 
     while (!glfwWindowShouldClose(PlatForm->window))
     {
-        // NOTE: Have to load model inside the game loop
-        glm::mat4 lightModel = glm::mat4(1.0f);            
         glm::mat4 cubeModel = glm::mat4(1.0f);            
-        glm::vec3 objectPos = glm::vec3(1.2f, 1.0f, 2.0f);
+        glm::mat4 lightModel = glm::mat4(1.0f);            
+        lightModel = scale(lightModel, glm::vec3(2.0f));
+        // NOTE: Have to load model inside the game loop
 
         // if(delayTime >= 120){
         //     FreeLibrary(PlatformLibrary);
@@ -221,38 +271,40 @@ int main(int* argc, char** argv[])
         // =======================
 
         // Move Model
-        lightModel = translate(lightModel, lightPos);
-        lightModel = scale(lightModel, glm::vec3(2.0f));
         // ================================
-
-        // Variate Light Color
-        glm::vec3 lightColor;
-        lightColor.x = sin(glfwGetTime()* 2.0f);
-        lightColor.y = sin(glfwGetTime()* 0.7f);
-        lightColor.z = sin(glfwGetTime()* 1.3f);
-        // ================================
-
-        // NOTE: Draw Lamp
         lampShader->use();
         lampShader->setMat4("view", view);
         lampShader->setMat4("projection", projection);
+
+        for (int i = 0; i < 4; i++){
+
+        // Variate Light Color
+        if(i == 1){            
+            lightColor[i].x = sin(glfwGetTime()* 2.0f);
+            lightColor[i].y = sin(glfwGetTime()* 0.7f);
+            lightColor[i].z = sin(glfwGetTime()* 1.3f);
+        }
+
+            // NOTE: Draw Lamp
+        lampShader->setVec3("lightColor", lightColor[i]);
+        lightModel = glm::translate(lightModel, pointLightPositions[i]);
         lampShader->setMat4("model", lightModel);
-        lampShader->setVec3("lightColor", lightColor);
+        // ================================        
+        // FIXED: We have to bind to shader to appropriate VAO before drawing something
+
         glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);        
-        // ================================================================
-        
-        // FIXED: We have to bind to shader to appropriate VAO before drawing something
+            // ================================================================
+        }
         //===================================================================
         // NOTE: Calculate ambient and diffuse based on light Color
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);
+        glm::vec3 diffuseColor = lightColor[1] * glm::vec3(0.5f);
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
         // ==================================================================
 
         // Set General Model spec for two object cubes
         objectShader->use();
-
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
 
         objectShader->setVec3("ViewPos", camera.Position);
@@ -260,61 +312,36 @@ int main(int* argc, char** argv[])
         objectShader->setMat4("projection", projection);
         objectShader->setMat4("model", cubeModel);
         // ==================================================================
-
-        // objectShader->setVec3("material.ambient", 1.0f, 0.5f, 0.31f);
-        // objectShader->setVec3("material.diffuse", 1.0f, 0.5f, 0.31f);
-        
-        // Set light color and position for one cube
-        // objectShader->setVec3("material.specular", 0.5f, 0.5f, 0.5f);
-        objectShader->setFloat("material.shininess", 20.0f);
-
-        // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
-        // objectShader->setVec3("light.direction",  -0.2f, -1.0f, -0.3f);
-
         // FOR THE MY MOST INTERESTING TYPE (POINT LIGHT)
-        objectShader->setVec3("light.position", lightPos);
-
-        objectShader->setFloat("light.constant", 1.0f);
-        objectShader->setFloat("light.linearTerm", 0.09f);
-        objectShader->setFloat("light.quadraticTerm", 0.032f);
         
         // FOR SPOTLIGHT
-        // objectShader->setVec3("light.position", camera.Position);
-        // objectShader->setVec3("light.direction", camera.Front);
+        objectShader->setVec3("spotlight.position", camera.Position);
+        objectShader->setVec3("spotlight.direction", camera.Front);
+        objectShader->setVec3("spotlight.ambient", 0.0f, 0.0f, 0.0f);
+        objectShader->setVec3("spotlight.diffuse", 1.0f, 1.0f, 1.0f);
+        objectShader->setVec3("spotlight.specular", 1.0f, 1.0f, 1.0f);
+        objectShader->setFloat("spotlight.constant", 1.0f);
+        objectShader->setFloat("spotlight.linearTerm", 0.09f);
+        objectShader->setFloat("spotLight.quadraticTerm ", 0.032f);
+        objectShader->setFloat("spotlight.cutOff", glm::cos(glm::radians(40.0f)));
+        objectShader->setFloat("spotlight.outerCutOff", glm::cos(glm::radians(42.5f)));
 
-
-        objectShader->setFloat("light.cutOff", glm::cos(glm::radians(40.0f)));
-        objectShader->setFloat("light.outerCutOff", glm::cos(glm::radians(42.5f)));
-
-        // objectShader->setVec3("light.ambient", ambientColor);
-        // objectShader->setVec3("light.diffuse", diffuseColor);        
-
-        objectShader->setVec3("light.ambient", glm::vec3(0.2f));
-        objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
-        objectShader->setVec3("light.specular",glm::vec3(1.0f));
-        
+        objectShader->setMat4("model", cubeModel);
         glBindVertexArray(PlatForm->VAO);
-        // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        
         // Then Move the model to different Position
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
         objectShader->use();
         // Bind Texture to shader
-        objectShader->setMat4("model", cubeModel);
-
-        glBindVertexArray(PlatForm->VAO);
         // Then Draw it out
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        objectShader->setMat4("model", cubeModel);
+        glBindVertexArray(PlatForm->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
 
         // =====================================================================
         // CYAN PLASTIC ONE
-        objectShader->setVec3("light.ambient", glm::vec3(1.0f));
-        objectShader->setVec3("light.diffuse", glm::vec3(1.0f));                
-        objectShader->setVec3("material.ambient", glm::vec3(cyan_plastic.ambient * glm::vec3(1.0f)));
-
         objectShader->setVec3("material.diffuse", cyan_plastic.diffuse);
         objectShader->setVec3("material.specular", cyan_plastic.specular);
         objectShader->setFloat("material.shininess", cyan_plastic.shininess);        
@@ -387,14 +414,7 @@ int main(int* argc, char** argv[])
                         //every third cube rotate
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
-            // ourShader->use();
-            // ourShader->setInt("texture1", 0);
-            // ourShader->setInt("texture2", 1);
-            // ourShader->setMat4("model",model);
             objectShader->use();
-            objectShader->setVec3("light.ambient", glm::vec3(0.2f));
-            objectShader->setVec3("light.diffuse", glm::vec3(0.5f));        
-            objectShader->setFloat("material.shininess", 25.0f);        
             ourShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);
