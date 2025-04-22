@@ -9,39 +9,8 @@
 
 #define MESH_H
 
-#include <glad/glad.h> // holds all OpenGL type declarations
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-
-#include <shader.h>
-
-#include <string>
-#include <vector>
-
-using namespace std;
-
-#define MAX_BONE_INFLUENCE 4
-
-struct Vertex {
-    glm::vec3 Position;
-    // Position
-    glm::vec3 Normal;
-    // Normalizing vector
-    glm::vec3 TexCoords;
-    // Texture Coordinates
-    glm::vec3 Tangent;
-    // Tangent
-    glm::vec3 Bitangent;
-    // Bitangent
-    // Bone Indexes
-    int m_BoneIDs [MAX_BONE_INFLUENCE];
-    // Weight of each bone
-    int m_Weights [MAX_BONE_INFLUENCE];
-};
-
 struct Texture{
-    unsigned int id:
+    unsigned int id;
     string type;
     string path;
 };
@@ -55,7 +24,8 @@ public:
     // MESH constructor
     Mesh( vector<Vertex> verticles,
           vector<unsigned int> indices,
-          vector<Texture> textures)this->verticles(verticles), this->indices(indices), this->textures(textures){
+          vector<Texture> textures):verticles(verticles), indices(indices), textures(textures)
+          {
               setupMesh();
           }
     // Render the Mesh
@@ -86,9 +56,9 @@ public:
             glBindTexture(GL_TEXTURE_2D, textures[i].id);
         }
         // Draw the mesh(Bind array, Load model, draw element/array)
-        shader->use();
+        shader.use();
         glBindVertexArray(this->VAO);
-        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>this->indices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(this->indices.size()), GL_UNSIGNED_INT, 0);
         // Always a good practice to set everything back to default once configured
         glActiveTexture(GL_TEXTURE0);
     }
@@ -101,7 +71,7 @@ private:
         glGenBuffers(1, &VBO);
         glGenBuffers(1, &EBO);
 
-        glBindVertexArrays(VAO);
+        glBindVertexArray(VAO);
         // Load data into vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, verticles.size()*sizeof(Vertex), &verticles[0], GL_STATIC_DRAW);
@@ -114,7 +84,7 @@ private:
         // Time to set vertex attribute pointers
         // POSITION
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0)
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
         // NORMAL
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
@@ -133,7 +103,7 @@ private:
                // WEIGHTs
               glEnableVertexAttribArray(6);
               glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
-        glBindVertexArrays(0);
+        glBindVertexArray(0);
     }
 };
 #endif

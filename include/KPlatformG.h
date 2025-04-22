@@ -18,10 +18,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#if !defined
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#endif
+
+#include <Model.h>
 #include "shader_s.h"
 #include "camera.h"
 // #include "stdint.h"

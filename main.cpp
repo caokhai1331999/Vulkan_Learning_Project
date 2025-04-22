@@ -96,8 +96,14 @@ int main(int* argc, char** argv[])
     
     Shader* objectShader = nullptr;
     objectShader = new Shader("1.object.vs", "1.object.fs");
+    // Shader objectShader("1.object.vs", "1.object.fs");
     printf("Lighted object ID:%d\n", objectShader->ID);
 
+    Shader simple_model_shader("1.model.vs", "1.model.fs");
+    printf("model object ID:%d\n", simple_model_shader.ID);    
+
+    Model* modell = nullptr;
+    modell = new Model("C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/build/backpack.obj");
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
     
@@ -229,6 +235,7 @@ int main(int* argc, char** argv[])
 
     while (!glfwWindowShouldClose(PlatForm->window))
     {
+        
         glm::mat4 cubeModel = glm::mat4(1.0f);            
         glm::mat4 lightModel = glm::mat4(1.0f);            
         lightModel = scale(lightModel, glm::vec3(2.0f));
@@ -249,7 +256,6 @@ int main(int* argc, char** argv[])
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         
 
         // NOTE: mat4 is to create a 3D space
@@ -261,6 +267,11 @@ int main(int* argc, char** argv[])
         // camera/view transformation
         glm::mat4 view = glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
 
+        // Load model
+        simple_model_shader.use();
+        simple_model_shader.setMat4("View", view);
+        simple_model_shader.setMat4("Projection", projection);
+        
         // ====================================================================
         // ON WORKING!!: Cube drawing
 
@@ -310,6 +321,7 @@ int main(int* argc, char** argv[])
         objectShader->setVec3("ViewPos", camera.Position);
         objectShader->setMat4("view", view);
         objectShader->setMat4("projection", projection);
+
         objectShader->setMat4("model", cubeModel);
         // ==================================================================
         // FOR THE MY MOST INTERESTING TYPE (POINT LIGHT)
@@ -326,20 +338,25 @@ int main(int* argc, char** argv[])
         objectShader->setFloat("spotlight.cutOff", glm::cos(glm::radians(40.0f)));
         objectShader->setFloat("spotlight.outerCutOff", glm::cos(glm::radians(42.5f)));
 
+        // objectShader->setMat4("model", cubeModel);
+        // glBindVertexArray(PlatForm->VAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        simple_model_shader.use();
+        simple_model_shader.setMat4("Model", cubeModel);
+        modell->Draw(simple_model_shader);
+        
+        // Then Move the model to different Position
+        cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
+
+        // Bind Texture to shader
+        // Then Draw it out
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        objectShader->use();
         objectShader->setMat4("model", cubeModel);
         glBindVertexArray(PlatForm->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
-        // Then Move the model to different Position
-        cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
-        objectShader->use();
-        // Bind Texture to shader
-        // Then Draw it out
-        // Draw a cube here (6 per face we have 6 faces so 36 indices)
-        objectShader->setMat4("model", cubeModel);
-        glBindVertexArray(PlatForm->VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
         // =====================================================================
         // CYAN PLASTIC ONE
         objectShader->setVec3("material.diffuse", cyan_plastic.diffuse);
@@ -351,17 +368,13 @@ int main(int* argc, char** argv[])
         glBindVertexArray(PlatForm->VAO);
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        
         //===========================================================
         
         // render boxes        
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
-
-        // ourShader->use();
-        // ourShader->setMat4("projection", projection);
-        // ourShader->setMat4("view", view);
 
         if(deltaTime > (float)(1/30)){            
 
@@ -415,7 +428,7 @@ int main(int* argc, char** argv[])
 //            if (i%3==0)
             // NOTE: Time to play with the cube movement
             objectShader->use();
-            ourShader->setMat4("model",model);            
+            objectShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);
             
@@ -449,6 +462,9 @@ int main(int* argc, char** argv[])
     delete PlatForm;
     PlatForm = nullptr;
 
+    delete modell;
+    modell = nullptr;
+    
     delete textures;
     textures = nullptr;
 
