@@ -8,6 +8,26 @@
    ======================================================================== */
 #define C_MESH_H
 
+#include <vector>
+#include "Shader_s.h"
+
+using namespace std; 
+#define MAX_BONE_INFLUENCE 4
+
+struct Vertex {
+    glm::vec3 Position;
+    glm::vec3 Normal;
+    glm::vec2 TexCoords;
+    // tangent
+    glm::vec3 Tangent;
+    // bitangent
+    glm::vec3 Bitangent;
+	//bone indexes which will influence this vertex
+	int m_BoneIDs[MAX_BONE_INFLUENCE];
+	//weights from each bone
+	float m_Weights[MAX_BONE_INFLUENCE];
+};
+
 struct Texture{
     unsigned int id;
     string type;
@@ -25,11 +45,10 @@ struct Mesh{
           vector<unsigned int> indices,
           vector<Texture> textures):verticles(verticles), indices(indices), textures(textures)
           {
-              setupMesh();
           }    
 };
 
-void setupMesh();
-void Draw(Shader &shader);
+void setupMesh(Mesh* mesh);
+void Draw(Mesh* mesh, Shader &shader);
 
 #endif

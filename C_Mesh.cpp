@@ -7,7 +7,7 @@
    ======================================================================== */
 #include "C_Mesh.h"
 
-void setupMesh(Mesh& mesh){
+void setupMesh(Mesh* mesh){
         glGenVertexArrays(1, &mesh->VAO);
         glGenBuffers(1, &mesh->VBO);
         glGenBuffers(1, &mesh->EBO);
@@ -15,7 +15,7 @@ void setupMesh(Mesh& mesh){
         glBindVertexArray(mesh->VAO);
         // Load data into vertex buffer
         glBindBuffer(GL_ARRAY_BUFFER, mesh->VBO);
-        glBufferData(GL_ARRAY_BUFFER, verticles.size()*sizeof(mesh->Vertex), &mesh->verticles[0], GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, mesh->verticles.size()*sizeof(Vertex), &mesh->verticles[0], GL_STATIC_DRAW);
         // Good thing about struct is that their memory is sequential for all its time
         // The effect is that we symply pass a pointer to the struct and it traslate into a glm::vec3
         // again translate to 3/2 float which translate into a byte array 
@@ -25,29 +25,29 @@ void setupMesh(Mesh& mesh){
         // Time to set vertex attribute pointers
         // POSITION
         glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
         // NORMAL
         glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)offsetof(mesh->Vertex, mesh->Normal));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Normal));
         // TEXCOORDS
         glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)offsetof(mesh->Vertex, mesh->TexCoords));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, TexCoords));
         // TANGENT
         glEnableVertexAttribArray(3);
-        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)offsetof(mesh->Vertex, mesh->Tangent));
+        glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Tangent));
         // BITANGENT
         glEnableVertexAttribArray(4);
-        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)offsetof(mesh->Vertex, mesh->Bitangent));
+        glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Bitangent));
                // IDS
               glEnableVertexAttribArray(5);
-              glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(mesh->Vertex), (void*)offsetof(mesh->Vertex, m_BoneIDs));
+              glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_BoneIDs));
                // WEIGHTs
               glEnableVertexAttribArray(6);
-              glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(mesh->Vertex, m_Weights));
+              glVertexAttribPointer(6, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, m_Weights));
         glBindVertexArray(0);    
 };
 
-void Draw(Mesh& mesh, Shader &shader){
+void Draw(Mesh* mesh, Shader &shader){
         // bind appropriate textures
         unsigned int diffuseNr  = 1;
         unsigned int specularNr = 1;

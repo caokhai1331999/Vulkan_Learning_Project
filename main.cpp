@@ -103,7 +103,9 @@ int main(int* argc, char** argv[])
     printf("model object ID:%d\n", simple_model_shader.ID);    
 
     Model* modell = nullptr;
-    modell = new Model("C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/build/backpack.obj");
+    modell = new Model();
+    std::string path = "C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/build/backpack.obj";
+    loadModel(modell, path);
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
     
@@ -344,7 +346,7 @@ int main(int* argc, char** argv[])
 
         simple_model_shader.use();
         simple_model_shader.setMat4("Model", cubeModel);
-        modell->Draw(simple_model_shader);
+        DDraw(modell, simple_model_shader);
         
         // Then Move the model to different Position
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z

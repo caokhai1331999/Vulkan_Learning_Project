@@ -19,7 +19,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <Model.h>
+#include <C_Model.h>
 #include "shader_s.h"
 #include "camera.h"
 // #include "stdint.h"
