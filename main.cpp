@@ -102,9 +102,10 @@ int main(int* argc, char** argv[])
     Shader simple_model_shader("1.model.vs", "1.model.fs");
     printf("model object ID:%d\n", simple_model_shader.ID);    
 
+    // Model Loading
     Model* modell = nullptr;
     modell = new Model();
-    std::string path = "C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/build/backpack.obj";
+    std::string path = "C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/backpack.obj";
     loadModel(modell, path);
 // Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
@@ -159,6 +160,14 @@ int main(int* argc, char** argv[])
     objectShader->setInt("material.diffuseMap", 2);
     objectShader->setInt("material.specularMap", 3);
 
+    objectShader->setFloat("material.shininess", 20.0f);
+
+    // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
+    objectShader->setVec3("dirlight.direction",  -0.2f, -1.0f, -0.3f);
+    objectShader->setVec3("dirlight.ambient", 0.05f, 0.05f, 0.05f);
+    objectShader->setVec3("dirlight.diffuse", 0.4f, 0.4f, 0.4f);
+    objectShader->setVec3("dirlight.specular", 0.5f, 0.5f, 0.5f);    
+    
     objectShader->setVec3("pointlights[0].position",  pointLightPositions[0]);
     objectShader->setVec3("pointlights[0].ambient", 0.05f, 0.05f, 0.05f);
     objectShader->setVec3("pointlights[0].diffuse", 0.8f, 0.8f, 0.8f);
@@ -191,20 +200,48 @@ int main(int* argc, char** argv[])
     objectShader->setFloat("pointlights[3].linear",    0.09f);
     objectShader->setFloat("pointlights[3].quadratic", 0.032f);	    
     
-
-    // Set light color and position for one cube
-    objectShader->setFloat("material.shininess", 20.0f);
+    // ===========================================================================
+    // Set light color and position for model shader
+    simple_model_shader.use();
+    simple_model_shader.setFloat("material.shininess", 20.0f);
 
     // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
-    objectShader->setVec3("dirlight.direction",  -0.2f, -1.0f, -0.3f);
-    objectShader->setVec3("dirlight.ambient", 0.05f, 0.05f, 0.05f);
-    objectShader->setVec3("dirlight.diffuse", 0.4f, 0.4f, 0.4f);
-    objectShader->setVec3("dirlight.specular", 0.5f, 0.5f, 0.5f);    
-    
-    for(int i = 0; i < 5; i++){
-        printf("Texture index %d: %d\n", i, textures[i]);
-    }
+    simple_model_shader.setVec3("dirlight.direction",  -0.2f, -1.0f, -0.3f);
+    simple_model_shader.setVec3("dirlight.ambient", 0.05f, 0.05f, 0.05f);
+    simple_model_shader.setVec3("dirlight.diffuse", 0.4f, 0.4f, 0.4f);
+    simple_model_shader.setVec3("dirlight.specular", 0.5f, 0.5f, 0.5f);        
 
+    simple_model_shader.setVec3("pointlights[0].position",  pointLightPositions[0]);
+    simple_model_shader.setVec3("pointlights[0].ambient", 0.05f, 0.05f, 0.05f);
+    simple_model_shader.setVec3("pointlights[0].diffuse", 0.8f, 0.8f, 0.8f);
+    simple_model_shader.setVec3("pointlights[0].specular", 1.0f, 1.0f, 1.0f);
+    simple_model_shader.setFloat("pointlights[0].constant",  1.0f);
+    simple_model_shader.setFloat("pointlights[0].linear",    0.09f);
+    simple_model_shader.setFloat("pointlights[0].quadratic", 0.032f);	    
+
+    simple_model_shader.setVec3("pointlights[1].position",  pointLightPositions[1]);
+    simple_model_shader.setVec3("pointlights[1].ambient", 0.05f, 0.05f, 0.05f);
+    simple_model_shader.setVec3("pointlights[1].diffuse", 0.8f, 0.8f, 0.8f);
+    simple_model_shader.setVec3("pointlights[1].specular", 1.0f, 1.0f, 1.0f);
+    simple_model_shader.setFloat("pointlights[1].constant",  1.0f);
+    simple_model_shader.setFloat("pointlights[1].linear",    0.09f);
+    simple_model_shader.setFloat("pointlights[1].quadratic", 0.032f);	    
+
+    simple_model_shader.setVec3("pointlights[2].position",  pointLightPositions[2]);
+    simple_model_shader.setVec3("pointlights[2].ambient", 0.05f, 0.05f, 0.05f);
+    simple_model_shader.setVec3("pointlights[2].diffuse", 0.8f, 0.8f, 0.8f);
+    simple_model_shader.setVec3("pointlights[2].specular", 1.0f, 1.0f, 1.0f);
+    simple_model_shader.setFloat("pointlights[2].constant",  1.0f);
+    simple_model_shader.setFloat("pointlights[2].linear",    0.09f);
+    simple_model_shader.setFloat("pointlights[2].quadratic", 0.032f);	    
+
+    simple_model_shader.setVec3("pointlights[3].position",  pointLightPositions[3]);
+    simple_model_shader.setVec3("pointlights[3].ambient", 0.05f, 0.05f, 0.05f);
+    simple_model_shader.setVec3("pointlights[3].diffuse", 0.8f, 0.8f, 0.8f);
+    simple_model_shader.setVec3("pointlights[3].specular", 1.0f, 1.0f, 1.0f);
+    simple_model_shader.setFloat("pointlights[3].constant",  1.0f);
+    simple_model_shader.setFloat("pointlights[3].linear",    0.09f);
+    simple_model_shader.setFloat("pointlights[3].quadratic", 0.032f);	    
     
     float count = 0.0f;
     float lastFrame = 0.0f;
@@ -270,6 +307,11 @@ int main(int* argc, char** argv[])
         glm::mat4 view = glm::lookAt(camera.Position, camera.Position + camera.Front, camera.Up);
 
         // Load model
+        objectShader->use();
+        objectShader->setMat4("View", view);
+        objectShader->setMat4("Projection", projection);
+
+        // Load model
         simple_model_shader.use();
         simple_model_shader.setMat4("View", view);
         simple_model_shader.setMat4("Projection", projection);
@@ -299,8 +341,8 @@ int main(int* argc, char** argv[])
         }
 
             // NOTE: Draw Lamp
-        lampShader->setVec3("lightColor", lightColor[i]);
         lightModel = glm::translate(lightModel, pointLightPositions[i]);
+        lampShader->setVec3("lightColor", lightColor[i]);
         lampShader->setMat4("model", lightModel);
         // ================================        
         // FIXED: We have to bind to shader to appropriate VAO before drawing something
@@ -316,15 +358,17 @@ int main(int* argc, char** argv[])
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f);
         // ==================================================================
 
+        simple_model_shader.use();
+        simple_model_shader.setVec3("ViewPos", camera.Position);
+        simple_model_shader.setMat4("view", view);
+        simple_model_shader.setMat4("projection", projection);
+        
         // Set General Model spec for two object cubes
         objectShader->use();
-        cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
-
         objectShader->setVec3("ViewPos", camera.Position);
         objectShader->setMat4("view", view);
         objectShader->setMat4("projection", projection);
 
-        objectShader->setMat4("model", cubeModel);
         // ==================================================================
         // FOR THE MY MOST INTERESTING TYPE (POINT LIGHT)
         
@@ -337,28 +381,49 @@ int main(int* argc, char** argv[])
         objectShader->setFloat("spotlight.constant", 1.0f);
         objectShader->setFloat("spotlight.linearTerm", 0.09f);
         objectShader->setFloat("spotLight.quadraticTerm ", 0.032f);
-        objectShader->setFloat("spotlight.cutOff", glm::cos(glm::radians(40.0f)));
-        objectShader->setFloat("spotlight.outerCutOff", glm::cos(glm::radians(42.5f)));
+        objectShader->setFloat("spotlight.cutOff", glm::cos(glm::radians(20.0f)));
+        objectShader->setFloat("spotlight.outerCutOff", glm::cos(glm::radians(22.5f)));
 
+        // =================================================================
+        // FOR SPOTLIGHT
+        simple_model_shader.setVec3("spotlight.position", camera.Position);
+        simple_model_shader.setVec3("spotlight.direction", camera.Front);
+        simple_model_shader.setVec3("spotlight.ambient", 0.0f, 0.0f, 0.0f);
+        simple_model_shader.setVec3("spotlight.diffuse", 1.0f, 1.0f, 1.0f);
+        simple_model_shader.setVec3("spotlight.specular", 1.0f, 1.0f, 1.0f);
+        simple_model_shader.setFloat("spotlight.constant", 1.0f);
+        simple_model_shader.setFloat("spotlight.linearTerm", 0.09f);
+        simple_model_shader.setFloat("spotLight.quadraticTerm ", 0.032f);
+        simple_model_shader.setFloat("spotlight.cutOff", glm::cos(glm::radians(40.0f)));
+        simple_model_shader.setFloat("spotlight.outerCutOff", glm::cos(glm::radians(45.5f)));
+        
         // objectShader->setMat4("model", cubeModel);
         // glBindVertexArray(PlatForm->VAO);
         // glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        simple_model_shader.use();
-        simple_model_shader.setMat4("Model", cubeModel);
-        DDraw(modell, simple_model_shader);
-        
-        // Then Move the model to different Position
-        cubeModel = translate(cubeModel, objectPos + static_cast<float >(-3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
+        cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
 
-        // Bind Texture to shader
-        // Then Draw it out
-        // Draw a cube here (6 per face we have 6 faces so 36 indices)
         objectShader->use();
         objectShader->setMat4("model", cubeModel);
         glBindVertexArray(PlatForm->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
+        // Then Move the model to different Position
+
+        // Bind Texture to shader
+        // Then Draw it out
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
+        cubeModel = translate(cubeModel, objectPos + static_cast<float >(-7.5)*glm::vec3(1.0, 0.0, 1.0)); // NOTE: The vector position is x,y,z
+
+        // objectShader->use();
+        // objectShader->setMat4("model", cubeModel);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        simple_model_shader.use();
+        simple_model_shader.setMat4("model", cubeModel);        
+        // glBindVertexArray(PlatForm->VAO);
+        DDraw(modell, simple_model_shader);
+                
         // =====================================================================
         // CYAN PLASTIC ONE
         objectShader->setVec3("material.diffuse", cyan_plastic.diffuse);
@@ -366,11 +431,10 @@ int main(int* argc, char** argv[])
         objectShader->setFloat("material.shininess", cyan_plastic.shininess);        
         
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 1.0, -1.0)); // NOTE: The vector position is x,y,z
+        // Draw a cube here (6 per face we have 6 faces so 36 indices)
         objectShader->setMat4("model", cubeModel);
         glBindVertexArray(PlatForm->VAO);
-        // Draw a cube here (6 per face we have 6 faces so 36 indices)
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        
         //===========================================================
         
         // render boxes        
@@ -432,7 +496,7 @@ int main(int* argc, char** argv[])
             objectShader->use();
             objectShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
-            glDrawArrays(GL_TRIANGLES,0,36);
+            glDrawArrays(GL_TRIANGLES,0,36);            
             
             lastFrame = static_cast<float>(glfwGetTime());
             deltaTime = lastFrame - currentFrame;

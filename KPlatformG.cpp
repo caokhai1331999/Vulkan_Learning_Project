@@ -237,7 +237,10 @@ bool Init(Platform* PlatForm){
         std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
     }
 
-    
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    // NOTE: May be forgot to turn this one lead to mess texture up 
+    stbi_set_flip_vertically_on_load(true);
+
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
@@ -294,73 +297,73 @@ unsigned int* LoadTexture(){
     // -------------------------
     // texture 1
     // ---------
-    glGenTextures(1, &texture[0]);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture[0]);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
+    // glGenTextures(1, &texture[0]);
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, texture[0]);
+    // // set the texture wrapping parameters
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // // set texture filtering parameters
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     GLenum format;
-    // I deleted these above unexpectedly
-    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // // I deleted these above unexpectedly
+    // stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
     unsigned char *data = nullptr;
-    data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);    
-    if (data)
-    {
-        if (nrChannels == 1)
-            format = GL_RED;
-        else if (nrChannels == 3)
-            format = GL_RGB;
-        else if (nrChannels == 4)
-            format = GL_RGBA;        
+    // data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);    
+    // if (data)
+    // {
+    //     if (nrChannels == 1)
+    //         format = GL_RED;
+    //     else if (nrChannels == 3)
+    //         format = GL_RGB;
+    //     else if (nrChannels == 4)
+    //         format = GL_RGBA;        
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout << "Succeed Loading image" << std::endl;
-    }
-    else
-    {
-        std::cout << "Failed to load texture from container image" << std::endl;
-    }
-    stbi_image_free(data);
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     std::cout << "Succeed Loading image" << std::endl;
+    // }
+    // else
+    // {
+    //     std::cout << "Failed to load texture from container image" << std::endl;
+    // }
+    // stbi_image_free(data);
 
-    // texture 2
-    // ---------
-    glGenTextures(1, &texture[1]);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, texture[1]);
-    // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // set texture filtering parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // load image, create texture and generate mipmaps
-    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        if (nrChannels == 1)
-            format = GL_RED;
-        else if (nrChannels == 3)
-            format = GL_RGB;
-        else if (nrChannels == 4)
-            format = GL_RGBA;        
+    // // texture 2
+    // // ---------
+    // glGenTextures(1, &texture[1]);
+    // glActiveTexture(GL_TEXTURE1);
+    // glBindTexture(GL_TEXTURE_2D, texture[1]);
+    // // set the texture wrapping parameters
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // // set texture filtering parameters
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // // load image, create texture and generate mipmaps
+    // data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    // if (data)
+    // {
+    //     if (nrChannels == 1)
+    //         format = GL_RED;
+    //     else if (nrChannels == 3)
+    //         format = GL_RGB;
+    //     else if (nrChannels == 4)
+    //         format = GL_RGBA;        
         
-        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-        //NOTE: Bind the data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-        std::cout << "Succeed Loading image" << std::endl;
-    }
-    else
-    {
-        std::cout << "Failed to load texture from awesomeface image" << std::endl;
-    }
+    //     // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+    //     //NOTE: Bind the data
+    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    //     glGenerateMipmap(GL_TEXTURE_2D);
+    //     std::cout << "Succeed Loading image" << std::endl;
+    // }
+    // else
+    // {
+    //     std::cout << "Failed to load texture from awesomeface image" << std::endl;
+    // }
     // return texture;
     //NOTE: Then free it
 

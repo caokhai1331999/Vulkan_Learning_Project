@@ -25,8 +25,8 @@ struct Model{
     vector<Mesh>meshes;
     string directory;
     vector<Texture>loaded_textures;
-
-    Model(char *path = nullptr){
+    bool gammaCorrection;
+    Model(char *path = nullptr, bool gamma = false):gammaCorrection(gamma){
         
     };    
 };

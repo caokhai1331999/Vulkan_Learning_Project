@@ -21,6 +21,7 @@ uniform light_in_general light;
 struct Material{
 
 // Ambient will be the same even with change in input
+   //sampler2D texture_diffused1;
    sampler2D emissionMap; 
    sampler2D diffuseMap; 
    sampler2D specularMap; 
@@ -103,8 +104,7 @@ vec3 CalcDirLight(DirLight light, vec3 norm, vec3 viewDir){
   vec3 reflecDir  = reflect(-light.direction, norm);
   float spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
 
-  vec3 specular = light.specular * spec * texture(material.diffuseMap, TexCoord).rgb;
-
+  vec3 specular = light.specular * spec * texture(material.specularMap, TexCoord).rgb;
   return (ambient + diffuse + specular);
 }
 
@@ -117,14 +117,12 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir){
   // Light direction, fragpos, norm
   vec3 ambient = light.ambient * texture(material.diffuseMap, TexCoord).rgb;
 
-  // Wrong
   float diff = max(dot(lightDir, norm), 0.0f);
   vec3 diffuse = light.diffuse * diff * texture(material.diffuseMap, TexCoord).rgb;
 
   // Wrong
   float spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
-  vec3 specular = light.specular * spec * texture(material.diffuseMap, TexCoord).rgb;
-
+  vec3 specular = light.specular * spec * texture(material.specularMap, TexCoord).rgb;
 
 // Now the attenuation calculation
 // This length is for calculating the distance
@@ -137,7 +135,7 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir){
    diffuse *= attenuation;
    specular *= attenuation;
 
-   return (ambient);
+   return (ambient + diffuse + specular);
 }
 
 vec3 CalcSpotLight(SpotLight light, vec3 lightDir, vec3 norm, vec3 viewDir){
@@ -156,8 +154,8 @@ vec3 CalcSpotLight(SpotLight light, vec3 lightDir, vec3 norm, vec3 viewDir){
 
 ambient = light.ambient * texture(material.diffuseMap, TexCoord).rgb;
 
-if(theta > light.cutOff)
 // Cause cos value of the angle is inversed( opposite) with angle value so this is when the theta is smaller than the cutoff
+if(theta > light.cutOff)
 {
 // Light direction, fragpos, norm
 
@@ -166,23 +164,25 @@ if(theta > light.cutOff)
 
 // Smooth edge calculation
    float epsilon = light.cutOff - light.outerCutOff;
+
    float intensity = clamp((theta - light.outerCutOff)/epsilon, 0.0, 1.0);
 
   // This is represent the angle between lightDir and norm
- diff = max(dot(lightDir, norm), 0.0f);
- diffuse = light.diffuse * diff * texture(material.diffuseMap, TexCoord).rgb;
+   diff = max(dot(lightDir, norm), 0.0f);
+   diffuse = light.diffuse * diff * texture(material.diffuseMap, TexCoord).rgb;
 
- reflecDir  = reflect(-lightDir, norm);
- spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
+   reflecDir  = reflect(-lightDir, norm);
+   spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
 
- specular = light.specular * spec * texture(material.diffuseMap, TexCoord).rgb;
+   specular = light.specular * spec * texture(material.specularMap, TexCoord).rgb;
 
- attenuation = 1.0f / (light.constant + light.linearTerm * distance + light.quadraticTerm * (distance * distance));
+   attenuation = 1.0f / (light.constant + light.linearTerm * distance + light.quadraticTerm * (distance * distance));
 
    ambient *= attenuation;
    diffuse *= attenuation;
    specular *= attenuation;
 
+   ambient *= intensity;
    diffuse *= intensity;
    specular *= intensity;	
 
