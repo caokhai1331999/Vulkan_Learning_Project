@@ -20,7 +20,7 @@ void main()
 	//aPos is the vertex position so the Fragment position is
 	//the dot product of model and vertex Position (plus two vector)
 	// This is to create a world space coor of fragment
-	FragPos = vec3( view *(model *vec4(aPos, 1.0f)));
+	FragPos = vec3(model *vec4(aPos, 1.0f));
 
 	Normal = mat3(transpose(inverse(view * model))) * aNormal;
 	TexCoord = aTexCoord;

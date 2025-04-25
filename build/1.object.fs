@@ -1,7 +1,7 @@
 #version 330 core
 
 //Set the output color vector first
-
+// conflict with distance var declared in vs
 out vec4 FragColor;
 
 uniform vec3 ViewPos;
@@ -21,7 +21,6 @@ uniform light_in_general light;
 struct Material{
 
 // Ambient will be the same even with change in input
-   //sampler2D texture_diffused1;
    sampler2D emissionMap; 
    sampler2D diffuseMap; 
    sampler2D specularMap; 
@@ -82,16 +81,16 @@ struct SpotLight{
 
  // For spotlight effect
  // spotlight area defining angle(Phi) maybe with the different name such as cutoff
- float cutOff;
+ float CutOff;
  // Now the smooth/soft edge effect
- float outerCutOff;
+ float OuterCutOff;
 };
 
 uniform SpotLight spotlight;
 
 vec3 CalcDirLight(DirLight light, vec3 norm, vec3 viewDir);
 vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir);
-vec3 CalcSpotLight(SpotLight light, vec3 lightDir, vec3 norm, vec3 viewDir);
+vec3 CalcSpotLight(SpotLight light, vec3 norm, vec3 viewDir);
 
 vec3 CalcDirLight(DirLight light, vec3 norm, vec3 viewDir){
   // Light direction, fragpos, norm
@@ -138,10 +137,8 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir){
    return (ambient + diffuse + specular);
 }
 
-vec3 CalcSpotLight(SpotLight light, vec3 lightDir, vec3 norm, vec3 viewDir){
+vec3 CalcSpotLight(SpotLight light, vec3 norm, vec3 viewDir){
 // Spot light effect
-// This is the cosine value of theta angle
-  float theta = dot(lightDir, (normalize(-light.direction)));
 // The so called lightDir is the spotDir
   vec3 ambient;
   float diff;
@@ -152,44 +149,53 @@ vec3 CalcSpotLight(SpotLight light, vec3 lightDir, vec3 norm, vec3 viewDir){
   vec3 diffuse;
   vec3 specular;
 
-ambient = light.ambient * texture(material.diffuseMap, TexCoord).rgb;
-
 // Cause cos value of the angle is inversed( opposite) with angle value so this is when the theta is smaller than the cutoff
-if(theta > light.cutOff)
-{
+
+// lightDir is the direction from flashlight to the fragment
+//light.direction is light direction while lightDir is alway spot direction while is perpencular with the fragment
+vec3 lightDir = normalize(light.position - FragPos);
+//theta is always equal to 180 but why
+float theta = dot(lightDir, normalize(-light.direction));
+
+
+//if(theta > light.CutOff)
+//{
 // Light direction, fragpos, norm
 
+   reflecDir  = reflect(-lightDir, norm);
    float distance = length(light.position - FragPos);
-   float attenuation;
 
-// Smooth edge calculation
-   float epsilon = light.cutOff - light.outerCutOff;
-
-   float intensity = clamp((theta - light.outerCutOff)/epsilon, 0.0, 1.0);
-
-  // This is represent the angle between lightDir and norm
-   diff = max(dot(lightDir, norm), 0.0f);
+   ambient = light.ambient * texture(material.diffuseMap, TexCoord).rgb;
+   spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
+   specular = light.specular * spec * texture(material.specularMap, TexCoord).rgb;
+   diff = max(dot(norm, lightDir), 0.0f);
    diffuse = light.diffuse * diff * texture(material.diffuseMap, TexCoord).rgb;
 
-   reflecDir  = reflect(-lightDir, norm);
-   spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
+// Smooth edge calculation
+// This is the cosine value of theta angle
+// Dot is cos value between 2 vector
+   float epsilon = (light.CutOff - light.OuterCutOff);
+   float intensity = clamp((theta - light.OuterCutOff) / epsilon, 0.0, 1.0);
 
-   specular = light.specular * spec * texture(material.specularMap, TexCoord).rgb;
+// Attenuation may worked
+   float attenuation = 1.0f / ( light.constant + (light.linearTerm * distance) + light.quadraticTerm * (distance * distance) );
 
-   attenuation = 1.0f / (light.constant + light.linearTerm * distance + light.quadraticTerm * (distance * distance));
-
+   // distance is reversed
    ambient *= attenuation;
    diffuse *= attenuation;
    specular *= attenuation;
 
-   ambient *= intensity;
-   diffuse *= intensity;
-   specular *= intensity;	
 
- return (ambient + diffuse + specular);
- } else {
- return ambient; 
- }
+   diffuse *= (intensity);
+   specular *= (intensity);
+
+  // This is represent the angle between lightDir and norm
+
+// For some reason the diffuse and specular is to weak may be it wasn't scaled
+   return (ambient + diffuse + specular);
+// } else {
+  // return ambient; 
+ //}
 }
 
 void main()
@@ -235,8 +241,8 @@ void main()
 	// Emission vec3 emission = texture(material.emissionMap, TexCoord).rgb;
 
 	// SPOT
-	lightDir = normalize(spotlight.position - FragPos);// lightDir is the direction from flashlight to the fragment
-	result += CalcSpotLight(spotlight, lightDir, norm, viewDir);
+
+	result += CalcSpotLight(spotlight, norm, viewDir);
 
 	FragColor = vec4(result, 1.0f);
 }

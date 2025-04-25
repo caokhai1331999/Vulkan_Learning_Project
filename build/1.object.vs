@@ -14,7 +14,6 @@ uniform mat4 projection;
 out vec3 Normal;
 out vec3 FragPos;
 out vec2 TexCoord;
-out float distance;
 
 void main()
 {
@@ -23,8 +22,9 @@ void main()
 	//aPos is the vertex position so the Fragment position is
 	//the dot product of model and vertex Position (plus two vector)
 	// This is to create a world space coor of fragment
-	FragPos = vec3( view *(model *vec4(aPos, 1.0f)));
-	//distance = root(pow(FragPos.x - lightPos.x, 2) + pow(FragPos.y - lightPos.y, 2)+ pow(FragPos.z - lightPos.z, 2));
+
+	// From the moment we add view to the fragpos formular it was wrong
+	FragPos = vec3( model *vec4(aPos, 1.0f));
 
 	Normal = mat3(transpose(inverse(view * model))) * aNormal;
 	TexCoord = aTexCoord;
