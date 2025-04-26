@@ -89,7 +89,8 @@ int main(int* argc, char** argv[])
     // LoadGLFunctions();        
     Shader* ourShader = nullptr;
     ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
-
+    printf("Lamp Shader ID:%d\n", ourShader->ID);
+    
     Shader* lampShader = nullptr;
     lampShader = new Shader("1.lamp.vs", "1.lamp.fs");
     printf("Lamp Shader ID:%d\n", lampShader->ID);
@@ -107,7 +108,6 @@ int main(int* argc, char** argv[])
     modell = new Model();
     std::string path = "C:/Users/klove/Documents/repos/GLFW2/Vulkan_Learning_Project/build/backpack.obj";
     loadModel(modell, path);
-// Shader ourShader("7.3.camera.vs", "7.3.camera.fs");
     
     
     // build and compile our shader zprogram
@@ -154,12 +154,18 @@ int main(int* argc, char** argv[])
     textures = new unsigned int();
     // textures = LoadTexture();
     textures = LoadTexture();    
-    objectShader->use();
 
+    ourShader->use();
+    ourShader->setInt("texture1", 5);
+    printf("Texture 0 ID: %d", textures[0]);
+    
+    objectShader->use();
     objectShader->setInt("material.emissionMap", 4);
     objectShader->setInt("material.diffuseMap", 2);
     objectShader->setInt("material.specularMap", 3);
 
+    // ourShader->setInt("texture2", 3);
+    
     objectShader->setFloat("material.shininess", 20.0f);
 
     // FOR THE SIMPLEST TYPE(DIRECTIONAL LIGHT)
@@ -199,7 +205,6 @@ int main(int* argc, char** argv[])
     objectShader->setFloat("pointlights[3].constant",  1.0f);
     objectShader->setFloat("pointlights[3].linear",    0.09f);
     objectShader->setFloat("pointlights[3].quadratic", 0.032f);	    
-
 
     objectShader->setVec3("spotlight.ambient", 0.0f, 0.0f, 0.0f);
     objectShader->setVec3("spotlight.diffuse", 1.0f, 1.0f, 1.0f);
@@ -302,8 +307,16 @@ int main(int* argc, char** argv[])
         
         glm::mat4 cubeModel = glm::mat4(1.0f);            
         glm::mat4 lightModel = glm::mat4(1.0f);            
+
+        glm::mat4 planeModel = glm::mat4(1.0f);            
+
         lightModel = scale(lightModel, glm::vec3(2.0f));
-        // NOTE: Have to load model inside the game loop
+
+        planeModel = glm::translate(planeModel, glm::vec3(0.0f, 0.0f, 0.0f));
+        // planeModel = glm::rotate(planeModel, static_cast<float>(glfwGetTime( ))*glm::radians(20.0f), glm::vec3(1.0f, 1.5f, 2.0f));
+
+
+// NOTE: Have to load model inside the game loop
 
         // if(delayTime >= 120){
         //     FreeLibrary(PlatformLibrary);
@@ -320,7 +333,6 @@ int main(int* argc, char** argv[])
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
@@ -335,6 +347,11 @@ int main(int* argc, char** argv[])
         objectShader->use();
         objectShader->setMat4("View", view);
         objectShader->setMat4("Projection", projection);
+
+        //  dept test model
+        ourShader->use();
+        ourShader->setMat4("view", view);
+        ourShader->setMat4("projection", projection);
 
         // Load model
         simple_model_shader.use();
@@ -429,9 +446,9 @@ int main(int* argc, char** argv[])
         // glDrawArrays(GL_TRIANGLES, 0, 36);
 
         // ==========================================================
-        glBindVertexArray(PlatForm->VAO);
         simple_model_shader.use();
         simple_model_shader.setMat4("model", cubeModel);        
+        glBindVertexArray(PlatForm->VAO);
         DDraw(modell, simple_model_shader);
         // ==========================================================
         
@@ -442,6 +459,7 @@ int main(int* argc, char** argv[])
         objectShader->setFloat("material.shininess", cyan_plastic.shininess);        
         
         cubeModel = translate(cubeModel, objectPos + static_cast<float >(3.5)*glm::vec3(1.0, 1.0, -1.0)); // NOTE: The vector position is x,y,z
+
         // Draw a cube here (6 per face we have 6 faces so 36 indices)
         objectShader->use();
         objectShader->setMat4("model", cubeModel);
@@ -453,6 +471,27 @@ int main(int* argc, char** argv[])
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
+        // -=======================
+
+        // WHY ourShader didn't work
+        ourShader->use();
+        planeModel = glm::translate(planeModel, glm::vec3(-1.0f, 0.0f, -1.0f));
+        // Still don't know this I thought sampler2D and BindTexture is the same thing
+        ourShader->setMat4("model", planeModel);
+        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        glBindVertexArray(PlatForm->VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        planeModel = glm::translate(planeModel, glm::vec3(2.0f, 0.0f, 0.0f));
+        ourShader->setMat4("model", planeModel);
+        glBindVertexArray(PlatForm->VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);        
+
+        planeModel = glm::scale(planeModel, glm::vec3(3.0f));
+        ourShader->setMat4("model", glm::mat4(1.0f));
+        glBindVertexArray(PlatForm->PlaneVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        // -=======================
 
         if(deltaTime > (float)(1/30)){            
 

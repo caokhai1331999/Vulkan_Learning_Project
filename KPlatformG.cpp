@@ -151,6 +151,17 @@ void CreateVertexStuff(Platform* p)
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
+    float PlaneVerticles[] = {
+        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+
+         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+         5.0f, -0.5f, -5.0f,  2.0f, 2.0f			        
+    };
+    
     // NOTE: A cube position with texture position
     // NOTE:NO need for texture filling for cube and light one
     // This is for cube and light Cube
@@ -172,7 +183,20 @@ void CreateVertexStuff(Platform* p)
     // texture coord attribute
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
     glEnableVertexAttribArray(2);
+    
+    // ===========================================================================
+    glGenBuffers(1, &p->PlaneVBO);
+    glGenVertexArrays(1, &p->PlaneVAO);
 
+    glBindBuffer(GL_ARRAY_BUFFER, p->PlaneVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(PlaneVerticles), PlaneVerticles, GL_STATIC_DRAW);
+    glBindVertexArray(p->PlaneVAO);
+
+    //position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)(3*sizeof(float)) );
+    glEnableVertexAttribArray(1);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -244,6 +268,7 @@ bool Init(Platform* PlatForm){
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
     return true;
 }
 
@@ -291,80 +316,79 @@ void loadTexture(char const * path, unsigned int* textureID)
 
 unsigned int* LoadTexture(){
 
+    // TEXTURE ID for what
     unsigned int* texture = new unsigned int[5];
 
     // load and create a texture
     // -------------------------
     // texture 1
     // ---------
-    // glGenTextures(1, &texture[0]);
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, texture[0]);
-    // // set the texture wrapping parameters
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // // set texture filtering parameters
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // // load image, create texture and generate mipmaps
+    glGenTextures(1, &texture[0]);
+    glActiveTexture(GL_TEXTURE5);// index of generated texture
+    glBindTexture(GL_TEXTURE_2D, texture[0]);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
     int width, height, nrChannels;
     GLenum format;
-    // // I deleted these above unexpectedly
-    // stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+    // I deleted these above unexpectedly
+    stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
     unsigned char *data = nullptr;
-    // data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);    
-    // if (data)
-    // {
-    //     if (nrChannels == 1)
-    //         format = GL_RED;
-    //     else if (nrChannels == 3)
-    //         format = GL_RGB;
-    //     else if (nrChannels == 4)
-    //         format = GL_RGBA;        
+    data = stbi_load("Harry and Accomplices.jpg", &width, &height, &nrChannels, 0);    
+    if (data)
+    {
+        if (nrChannels == 1)
+            format = GL_RED;
+        else if (nrChannels == 3)
+            format = GL_RGB;
+        else if (nrChannels == 4)
+            format = GL_RGBA;        
 
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     std::cout << "Succeed Loading image" << std::endl;
-    // }
-    // else
-    // {
-    //     std::cout << "Failed to load texture from container image" << std::endl;
-    // }
-    // stbi_image_free(data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "Succeed Loading image" << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture from container image" << std::endl;
+    }
 
-    // // texture 2
-    // // ---------
-    // glGenTextures(1, &texture[1]);
-    // glActiveTexture(GL_TEXTURE1);
-    // glBindTexture(GL_TEXTURE_2D, texture[1]);
-    // // set the texture wrapping parameters
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // // set texture filtering parameters
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    // // load image, create texture and generate mipmaps
-    // data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
-    // if (data)
-    // {
-    //     if (nrChannels == 1)
-    //         format = GL_RED;
-    //     else if (nrChannels == 3)
-    //         format = GL_RGB;
-    //     else if (nrChannels == 4)
-    //         format = GL_RGBA;        
+    // texture 2
+    // ---------
+    glGenTextures(1, &texture[1]);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture[1]);
+    // set the texture wrapping parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    // set texture filtering parameters
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    // load image, create texture and generate mipmaps
+    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    if (data)
+    {
+        if (nrChannels == 1)
+            format = GL_RED;
+        else if (nrChannels == 3)
+            format = GL_RGB;
+        else if (nrChannels == 4)
+            format = GL_RGBA;        
         
-    //     // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
-    //     //NOTE: Bind the data
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    //     glGenerateMipmap(GL_TEXTURE_2D);
-    //     std::cout << "Succeed Loading image" << std::endl;
-    // }
-    // else
-    // {
-    //     std::cout << "Failed to load texture from awesomeface image" << std::endl;
-    // }
-    // return texture;
+        // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
+        //NOTE: Bind the data
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+        std::cout << "Succeed Loading image" << std::endl;
+    }
+    else
+    {
+        std::cout << "Failed to load texture from awesomeface image" << std::endl;
+    }
     //NOTE: Then free it
 
     // texture 3

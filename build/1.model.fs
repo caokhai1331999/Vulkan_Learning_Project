@@ -21,7 +21,7 @@ uniform light_in_general light;
 struct Material{
 
 // Ambient will be the same even with change in input
-   sampler2D texture_diffused0;
+   sampler2D texture_diffused1;
 
    vec3 ambient;
    vec3 diffuse;
@@ -92,16 +92,16 @@ vec3 CalcSpotLight(SpotLight light, vec3 norm, vec3 viewDir);
 
 vec3 CalcDirLight(DirLight light, vec3 norm, vec3 viewDir){
   // Light direction, fragpos, norm
-  vec3 ambient = light.ambient * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 ambient = light.ambient * texture(material.texture_diffused1, TexCoord).rgb;
 
   // This is represent the angle between lightDir and norm
   float diff = max(dot(-light.direction, norm), 0.0f);
-  vec3 diffuse = light.diffuse * diff * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 diffuse = light.diffuse * diff * texture(material.texture_diffused1, TexCoord).rgb;
 
   vec3 reflecDir  = reflect(-light.direction, norm);
   float spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
 
-  vec3 specular = light.specular * spec * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 specular = light.specular * spec * texture(material.texture_diffused1, TexCoord).rgb;
 
   return (ambient + diffuse + specular);
 }
@@ -113,14 +113,14 @@ vec3 CalcPointLight(PointLight light, vec3 norm, vec3 viewDir){
   vec3 reflecDir  = reflect(-lightDir, norm);
 
   // Light direction, fragpos, norm
-  vec3 ambient = light.ambient * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 ambient = light.ambient * texture(material.texture_diffused1, TexCoord).rgb;
 
   float diff = max(dot(lightDir, norm), 0.0f);
-  vec3 diffuse = light.diffuse * diff * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 diffuse = light.diffuse * diff * texture(material.texture_diffused1, TexCoord).rgb;
 
   // Wrong
   float spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
-  vec3 specular = light.specular * spec * texture(material.texture_diffused0, TexCoord).rgb;
+  vec3 specular = light.specular * spec * texture(material.texture_diffused1, TexCoord).rgb;
 
 
 // Now the attenuation calculation
@@ -165,11 +165,11 @@ float theta = dot(lightDir, normalize(-light.direction));
    reflecDir  = reflect(-lightDir, norm);
    float distance = length(light.position - FragPos);
 
-   ambient = light.ambient * texture(material.texture_diffused0, TexCoord).rgb;
+   ambient = light.ambient * texture(material.texture_diffused1, TexCoord).rgb;
    spec = pow(max(dot(reflecDir, viewDir), 0.0f), material.shininess);
-   specular = light.specular * spec * texture(material.texture_diffused0, TexCoord).rgb;
+   specular = light.specular * spec * texture(material.texture_diffused1, TexCoord).rgb;
    diff = max(dot(norm, lightDir), 0.0f);
-   diffuse = light.diffuse * diff * texture(material.texture_diffused0, TexCoord).rgb;
+   diffuse = light.diffuse * diff * texture(material.texture_diffused1, TexCoord).rgb;
 
 // Smooth edge calculation
 // This is the cosine value of theta angle

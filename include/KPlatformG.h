@@ -53,6 +53,10 @@ struct Platform{
     GLFWwindow* window;
     unsigned int VBO;
     unsigned int VAO;
+
+    unsigned int PlaneVBO;
+    unsigned int PlaneVAO;
+
     unsigned int EBO;
     Platform(){
         window = NULL;
