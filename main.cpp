@@ -2,7 +2,6 @@
 #include "Windows.h"
 // #include <stdio.h>
 // #include "camera.h"
-
 #pragma once
 
 #define INIT(name) bool name(Platform* PlatForm)
@@ -97,6 +96,9 @@ int main(int* argc, char** argv[])
     
     Shader* objectShader = nullptr;
     objectShader = new Shader("1.object.vs", "1.object.fs");
+
+    Shader* single_color_shader = nullptr;
+    single_color_shader = new Shader("7.3.camera.vs", "1.single_color_shader.fs");
     // Shader objectShader("1.object.vs", "1.object.fs");
     printf("Lighted object ID:%d\n", objectShader->ID);
 
@@ -332,7 +334,7 @@ int main(int* argc, char** argv[])
         // render
         // ------
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         // NOTE: mat4 is to create a 3D space
         // WORKING!!
@@ -357,6 +359,11 @@ int main(int* argc, char** argv[])
         simple_model_shader.use();
         simple_model_shader.setMat4("View", view);
         simple_model_shader.setMat4("Projection", projection);
+
+        // Load model
+        single_color_shader->use();
+        single_color_shader->setMat4("View", view);
+        single_color_shader->setMat4("Projection", projection);
         
         // ====================================================================
         // ON WORKING!!: Cube drawing
@@ -367,6 +374,9 @@ int main(int* argc, char** argv[])
         // lightPos.z += 5.0f *(sin(glfwGetTime())* 2.0f + 1.5f)* LampMovingSpeed;
         // =======================
 
+        // We don't write the floor stencil
+        glStencilMask(0x00);
+        
         // Move Model
         // ================================
         lampShader->use();
@@ -450,7 +460,9 @@ int main(int* argc, char** argv[])
         simple_model_shader.setMat4("model", cubeModel);        
         glBindVertexArray(PlatForm->VAO);
         DDraw(modell, simple_model_shader);
-        // ==========================================================
+
+
+ // ==========================================================
         
         // =====================================================================
         // CYAN PLASTIC ONE
@@ -474,23 +486,61 @@ int main(int* argc, char** argv[])
         // -=======================
 
         // WHY ourShader didn't work
+        // DONE! Mistakenly typo mistake in setting uniform variable
+        planeModel = glm::scale(planeModel, glm::vec3(3.0f));
+        ourShader->use();
+        ourShader->setMat4("model", glm::mat4(1.0f));
+        glBindVertexArray(PlatForm->PlaneVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
         ourShader->use();
         planeModel = glm::translate(planeModel, glm::vec3(-1.0f, 0.0f, -1.0f));
         // Still don't know this I thought sampler2D and BindTexture is the same thing
+        //1st :  Render pass draw object as normal, writing to the stencil buffer
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);        
+        // ==================================================
         ourShader->setMat4("model", planeModel);
         glBindTexture(GL_TEXTURE_2D, textures[0]);
         glBindVertexArray(PlatForm->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        
         planeModel = glm::translate(planeModel, glm::vec3(2.0f, 0.0f, 0.0f));
         ourShader->setMat4("model", planeModel);
         glBindVertexArray(PlatForm->VAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);        
+        
+        // STENCIL ON
+        // still don't know why this part doesn't product anything
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
+        glDisable(GL_DEPTH_TEST);
 
-        planeModel = glm::scale(planeModel, glm::vec3(3.0f));
-        ourShader->setMat4("model", glm::mat4(1.0f));
-        glBindVertexArray(PlatForm->PlaneVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        single_color_shader->use();
+        glm::mat4 presizedModel = glm::mat4(1.0f);
+        presizedModel = glm::translate(presizedModel, glm::vec3(-1.0f, 0.0f, -1.0f));
+        presizedModel = glm::scale(presizedModel, glm::vec3(1.1f));
+        single_color_shader->setMat4("model", presizedModel);
+        glBindVertexArray(PlatForm->VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        presizedModel = glm::mat4(1.0f);
+        presizedModel = glm::translate(presizedModel, glm::vec3(2.0f, 0.0f, 0.0f));
+        presizedModel = glm::scale(presizedModel, glm::vec3(1.2f));
+        single_color_shader->setMat4("model", presizedModel);
+        glBindVertexArray(PlatForm->VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 36);        
+        
+        // STENCIL OFF
+        glStencilMask(0xFF);
+        glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        glEnable(GL_DEPTH_TEST);
+
+        
+        // Draw the border of the one single cube
+        //REMEMBER! : Render pass 2: slight scale the object up. This time disable stencil writing
+        // Cause the stencil buffer now filled with several 1s. The parts of the buffer that are 1 are not drawn, thus only the object's differences, making it look like border 
+        
         // -=======================
 
         if(deltaTime > (float)(1/30)){            
@@ -559,6 +609,7 @@ int main(int* argc, char** argv[])
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
+        // --stencilTest fail, deptTest fail but sten pass, both pass
         glfwSwapBuffers(PlatForm->window);
         glfwPollEvents();
     }
@@ -575,6 +626,9 @@ int main(int* argc, char** argv[])
 
     delete objectShader;
     objectShader = nullptr;
+
+    delete single_color_shader;
+    single_color_shader = nullptr;
 
     delete PlatForm;
     PlatForm = nullptr;

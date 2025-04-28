@@ -262,6 +262,7 @@ bool Init(Platform* PlatForm){
     }
 
     // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+
     // NOTE: May be forgot to turn this one lead to mess texture up 
     stbi_set_flip_vertically_on_load(true);
 
@@ -269,6 +270,9 @@ bool Init(Platform* PlatForm){
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);    
     return true;
 }
 
