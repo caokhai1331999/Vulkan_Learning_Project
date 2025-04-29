@@ -364,7 +364,7 @@ unsigned int* LoadTexture(){
     // texture 2
     // ---------
     glGenTextures(1, &texture[1]);
-    glActiveTexture(GL_TEXTURE1);
+    glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, texture[1]);
     // set the texture wrapping parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -373,7 +373,7 @@ unsigned int* LoadTexture(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
-    data = stbi_load("awesomeface.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("grass.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         if (nrChannels == 1)
@@ -385,7 +385,7 @@ unsigned int* LoadTexture(){
         
         // note that the awesomeface.png has transparency and thus an alpha channel, so make sure to tell OpenGL the data type is of GL_RGBA
         //NOTE: Bind the data
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
         std::cout << "Succeed Loading image" << std::endl;
     }

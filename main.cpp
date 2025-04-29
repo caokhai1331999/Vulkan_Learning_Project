@@ -98,9 +98,9 @@ int main(int* argc, char** argv[])
     objectShader = new Shader("1.object.vs", "1.object.fs");
 
     Shader* single_color_shader = nullptr;
-    single_color_shader = new Shader("7.3.camera.vs", "1.single_color_shader.fs");
+    single_color_shader = new Shader("1.single_color_shader.vs", "1.single_color_shader.fs");
     // Shader objectShader("1.object.vs", "1.object.fs");
-    printf("Lighted object ID:%d\n", objectShader->ID);
+    printf("Single color shader ID:%d\n", single_color_shader->ID);
 
     Shader simple_model_shader("1.model.vs", "1.model.fs");
     printf("model object ID:%d\n", simple_model_shader.ID);    
@@ -158,8 +158,8 @@ int main(int* argc, char** argv[])
     textures = LoadTexture();    
 
     ourShader->use();
-    ourShader->setInt("texture1", 5);
-    printf("Texture 0 ID: %d", textures[0]);
+    ourShader->setInt("texture1", 6);
+    printf("Texture 1 ID: %d", textures[1]);
     
     objectShader->use();
     objectShader->setInt("material.emissionMap", 4);
@@ -362,8 +362,8 @@ int main(int* argc, char** argv[])
 
         // Load model
         single_color_shader->use();
-        single_color_shader->setMat4("View", view);
-        single_color_shader->setMat4("Projection", projection);
+        single_color_shader->setMat4("view", view);
+        single_color_shader->setMat4("projection", projection);
         
         // ====================================================================
         // ON WORKING!!: Cube drawing
@@ -374,7 +374,7 @@ int main(int* argc, char** argv[])
         // lightPos.z += 5.0f *(sin(glfwGetTime())* 2.0f + 1.5f)* LampMovingSpeed;
         // =======================
 
-        // We don't write the floor stencil
+        // We don't write the floor stencil and others than the harry texture cube
         glStencilMask(0x00);
         
         // Move Model
@@ -483,63 +483,83 @@ int main(int* argc, char** argv[])
         x = 1.0f;
         y = 1.0f;
         z = 1.0f;
-        // -=======================
-
-        // WHY ourShader didn't work
+        // =======================
         // DONE! Mistakenly typo mistake in setting uniform variable
-        planeModel = glm::scale(planeModel, glm::vec3(3.0f));
-        ourShader->use();
-        ourShader->setMat4("model", glm::mat4(1.0f));
+        // Draw a plane
+        single_color_shader->use();
+        single_color_shader->setMat4("model", glm::mat4(1.0f));
         glBindVertexArray(PlatForm->PlaneVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        ourShader->use();
-        planeModel = glm::translate(planeModel, glm::vec3(-1.0f, 0.0f, -1.0f));
+        glBindVertexArray(0);
+        
         // Still don't know this I thought sampler2D and BindTexture is the same thing
         //1st :  Render pass draw object as normal, writing to the stencil buffer
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilMask(0xFF);        
+        // glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        // glStencilMask(0xFF);
         // ==================================================
-        ourShader->setMat4("model", planeModel);
-        glBindTexture(GL_TEXTURE_2D, textures[0]);
+        objectShader->use();
         glBindVertexArray(PlatForm->VAO);
+        planeModel = glm::translate(planeModel, glm::vec3(-1.0f, -2.0f, -1.0f));
+        objectShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+        // draw grass texture per cube
         
-        planeModel = glm::translate(planeModel, glm::vec3(2.0f, 0.0f, 0.0f));
-        ourShader->setMat4("model", planeModel);
+        planeModel = glm::mat4(1.0f);
+        planeModel = glm::translate(planeModel, glm::vec3(2.0f, -2.0f, 0.0f));
         glBindVertexArray(PlatForm->VAO);
+        objectShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);        
+        
+        glm::mat4 grasspanel = glm::mat4(1.0f);
+        glm::vec3 vegetation[5] = {
+            glm::vec3(-1.5f,  0.0f, -0.48f),
+            glm::vec3( 1.5f,  0.0f,  0.51f),
+            glm::vec3( 0.0f,  0.0f,  0.7f),
+            glm::vec3(-0.3f,  0.0f, -2.3f),
+            glm::vec3( 0.5f,  0.0f, -0.6f)
+        };
+
+        // Why this doesn't work
+        ourShader->use();
+        // glBindTexture(GL_TEXTURE_2D, textures[1]);                
+        for(unsigned int i = 0; i < 5; i++){
+            grasspanel = glm::mat4(1.0f);
+            grasspanel = glm::translate(grasspanel, vegetation[i]);
+            glBindVertexArray(PlatForm->PlaneVAO);
+            ourShader->setMat4("model", grasspanel);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+        }
         
         // STENCIL ON
-        // still don't know why this part doesn't product anything
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilMask(0x00);
-        glDisable(GL_DEPTH_TEST);
-
-        single_color_shader->use();
-        glm::mat4 presizedModel = glm::mat4(1.0f);
-        presizedModel = glm::translate(presizedModel, glm::vec3(-1.0f, 0.0f, -1.0f));
-        presizedModel = glm::scale(presizedModel, glm::vec3(1.1f));
-        single_color_shader->setMat4("model", presizedModel);
-        glBindVertexArray(PlatForm->VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        presizedModel = glm::mat4(1.0f);
-        presizedModel = glm::translate(presizedModel, glm::vec3(2.0f, 0.0f, 0.0f));
-        presizedModel = glm::scale(presizedModel, glm::vec3(1.2f));
-        single_color_shader->setMat4("model", presizedModel);
-        glBindVertexArray(PlatForm->VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);        
-        
-        // STENCIL OFF
-        glStencilMask(0xFF);
-        glStencilFunc(GL_ALWAYS, 0, 0xFF);
-        glEnable(GL_DEPTH_TEST);
-
-        
+        // 2nd still don't know why this part doesn't product anything        
         // Draw the border of the one single cube
         //REMEMBER! : Render pass 2: slight scale the object up. This time disable stencil writing
         // Cause the stencil buffer now filled with several 1s. The parts of the buffer that are 1 are not drawn, thus only the object's differences, making it look like border 
+
+        // glStencilFunc(GL_NOTEQUAL, 1, 0xFF);//Disable stencil writing
+        // glStencilMask(0x00);// Now not touch the stencil buffer
+        // glDisable(GL_DEPTH_TEST);// To make sure scaled version border is visisble
+        // single_color_shader->use();
+        // glBindVertexArray(PlatForm->VAO);
+        
+        // glm::mat4 presizedModel = glm::mat4(1.0f);
+        // presizedModel = glm::translate(presizedModel, glm::vec3(-1.0f, -2.0f, -1.0f));
+        // presizedModel = glm::scale(presizedModel, glm::vec3(1.1f));
+        // single_color_shader->setMat4("model", presizedModel);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        // presizedModel = glm::mat4(1.0f);
+        // presizedModel = glm::translate(presizedModel, glm::vec3(2.0f, -2.0f, 0.0f));
+        // presizedModel = glm::scale(presizedModel, glm::vec3(1.1f));
+        // single_color_shader->setMat4("model", presizedModel);
+        // glDrawArrays(GL_TRIANGLES, 0, 36);        
+        
+        // // STENCIL OFF
+        // glBindVertexArray(0);
+        // glStencilMask(0xFF);
+        // glStencilFunc(GL_ALWAYS, 0, 0xFF);
+        // glEnable(GL_DEPTH_TEST);
         
         // -=======================
 
@@ -593,11 +613,34 @@ int main(int* argc, char** argv[])
             }
                         //every third cube rotate
 //            if (i%3==0)
+            //1st :  Render pass draw object as normal, writing to the stencil buffer
+            glStencilFunc(GL_ALWAYS, 1, 0xFF);
+            glStencilMask(0xFF);        
             // NOTE: Time to play with the cube movement
             objectShader->use();
             objectShader->setMat4("model",model);            
             glBindVertexArray(PlatForm->VAO);
             glDrawArrays(GL_TRIANGLES,0,36);            
+
+            glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+            glStencilMask(0x00);
+            glDisable(GL_DEPTH_TEST);
+            single_color_shader->use();
+        
+            glm::mat4 presizedModel = glm::mat4(1.0f);
+            glBindVertexArray(PlatForm->VAO);
+            presizedModel = model;
+            presizedModel = glm::scale(presizedModel, glm::vec3(1.1f));
+            single_color_shader->setMat4("model", presizedModel);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+        
+            // STENCIL OFF
+            glBindVertexArray(0);
+            glStencilMask(0xFF);
+            glStencilFunc(GL_ALWAYS, 0, 0xFF);
+            glEnable(GL_DEPTH_TEST);
+        
+            
             
             lastFrame = static_cast<float>(glfwGetTime());
             deltaTime = lastFrame - currentFrame;
