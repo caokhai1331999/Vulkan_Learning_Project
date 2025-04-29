@@ -9,7 +9,24 @@
 #define C_MESH_H
 
 #include <vector>
-#include "Shader_s.h"
+
+#if !defined
+#define GLAD_LIB_AND_SHADER
+#include <glad/glad.h>
+#include <glad/glad.c>//must be place
+#endif
+
+#if !defined
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
+
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include "camera.h"
+#include "shader_s.h"
+
 
 using namespace std; 
 #define MAX_BONE_INFLUENCE 4

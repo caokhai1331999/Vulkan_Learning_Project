@@ -8,24 +8,9 @@
    ======================================================================== */
 #include "stdio.h"
 #include <iostream>
-
-#if !defined
-#define GLAD_LIB_AND_SHADER
-#include <glad/glad.h>
-#include <glad/glad.c>//must be place
-#endif
-
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
 #include <C_Model.h>
-#include "shader_s.h"
-#include "camera.h"
 // #include "stdint.h"
 // #include <glm/glm.hpp>
-
-
 using namespace std;
 // settings
 const unsigned int SCR_WIDTH = 800;

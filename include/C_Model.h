@@ -13,11 +13,6 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#if !defined
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#endif
-
 #include "C_Mesh.h"
 
 struct Model{

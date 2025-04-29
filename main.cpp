@@ -158,7 +158,7 @@ int main(int* argc, char** argv[])
     textures = LoadTexture();    
 
     ourShader->use();
-    ourShader->setInt("texture1", 6);
+    ourShader->setInt("texture1", 5);
     printf("Texture 1 ID: %d", textures[1]);
     
     objectShader->use();
@@ -497,17 +497,17 @@ int main(int* argc, char** argv[])
         // glStencilFunc(GL_ALWAYS, 1, 0xFF);
         // glStencilMask(0xFF);
         // ==================================================
-        objectShader->use();
+        ourShader->use();
         glBindVertexArray(PlatForm->VAO);
         planeModel = glm::translate(planeModel, glm::vec3(-1.0f, -2.0f, -1.0f));
-        objectShader->setMat4("model", planeModel);
+        ourShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         // draw grass texture per cube
         
         planeModel = glm::mat4(1.0f);
         planeModel = glm::translate(planeModel, glm::vec3(2.0f, -2.0f, 0.0f));
         glBindVertexArray(PlatForm->VAO);
-        objectShader->setMat4("model", planeModel);
+        ourShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);        
         
         glm::mat4 grasspanel = glm::mat4(1.0f);
