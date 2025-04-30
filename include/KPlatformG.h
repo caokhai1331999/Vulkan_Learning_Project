@@ -42,6 +42,9 @@ struct Platform{
     unsigned int PlaneVBO;
     unsigned int PlaneVAO;
 
+    unsigned int grassVBO;
+    unsigned int GrassVAO;
+
     unsigned int EBO;
     Platform(){
         window = NULL;

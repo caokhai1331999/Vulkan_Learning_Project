@@ -151,15 +151,28 @@ void CreateVertexStuff(Platform* p)
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
     };
 
+    float GrassVerticles[] = {
+        // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
+   //       x,  y,    z  I messed up the texCoord index
+        -0.5f, -5.0f,  5.0f,  2.0f, 0.0f,  // Each verticle 
+        -0.5f,  5.0f,  5.0f,  2.0f, 2.0f,
+        -0.5f, -5.0f, -5.0f,  0.0f, 0.0f,
+
+        -0.5f,  5.0f,  5.0f,  2.0f, 2.0f,
+        -0.5f, -5.0f, -5.0f,  0.0f, 0.0f,
+        -0.5f,  5.0f, -5.0f,  0.0f, 2.0f			        
+    };
+
     float PlaneVerticles[] = {
         // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+   //       x,  y,    z
+         -5.0f, -0.5f,  5.0f,  2.0f, 0.0f, // Each verticle
+          5.0f, -0.5f,  5.0f,  0.0f, 0.0f,
+         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
 
-         5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,  2.0f, 2.0f			        
+          5.0f, -0.5f,  5.0f,  2.0f, 0.0f,
+         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
+          5.0f, -0.5f, -5.0f,  2.0f, 2.0f			        
     };
     
     // NOTE: A cube position with texture position
@@ -185,12 +198,24 @@ void CreateVertexStuff(Platform* p)
     glEnableVertexAttribArray(2);
     
     // ===========================================================================
-    glGenBuffers(1, &p->PlaneVBO);
+    glGenBuffers(1, &p-> PlaneVBO);
     glGenVertexArrays(1, &p->PlaneVAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, p->PlaneVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(PlaneVerticles), PlaneVerticles, GL_STATIC_DRAW);
     glBindVertexArray(p->PlaneVAO);
+
+    //position attribute
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)(3*sizeof(float)) );
+    glEnableVertexAttribArray(1);
+    
+    // ===========================================================================
+    glGenVertexArrays(1, &p->GrassVAO);
+    glGenBuffers(1, &p->grassVBO); 
+    glBindBuffer(GL_ARRAY_BUFFER, p->grassVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GrassVerticles), GrassVerticles, GL_STATIC_DRAW);
+    glBindVertexArray(p->GrassVAO);
 
     //position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)0);

@@ -154,11 +154,11 @@ int main(int* argc, char** argv[])
     // Load and create textures
     unsigned int* textures  = nullptr;
     textures = new unsigned int();
-    // textures = LoadTexture();
     textures = LoadTexture();    
+    // textures = LoadTexture();
 
     ourShader->use();
-    ourShader->setInt("texture1", 5);
+    ourShader->setInt("texture1", 6);
     printf("Texture 1 ID: %d", textures[1]);
     
     objectShader->use();
@@ -510,7 +510,8 @@ int main(int* argc, char** argv[])
         ourShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);        
         
-        glm::mat4 grasspanel = glm::mat4(1.0f);
+        glm::mat4 grasspanel = glm::mat4(0.2f);
+
         glm::vec3 vegetation[5] = {
             glm::vec3(-1.5f,  0.0f, -0.48f),
             glm::vec3( 1.5f,  0.0f,  0.51f),
@@ -519,18 +520,26 @@ int main(int* argc, char** argv[])
             glm::vec3( 0.5f,  0.0f, -0.6f)
         };
 
-        // Why this doesn't work
         ourShader->use();
         // glBindTexture(GL_TEXTURE_2D, textures[1]);                
-        for(unsigned int i = 0; i < 5; i++){
-            grasspanel = glm::mat4(1.0f);
-            grasspanel = glm::translate(grasspanel, vegetation[i]);
-            glBindVertexArray(PlatForm->PlaneVAO);
-            ourShader->setMat4("model", grasspanel);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-            glBindVertexArray(0);
-        }
-        
+        // grasspanel = glm::mat4(1.0f);
+        grasspanel = glm::translate(grasspanel, vegetation[2]);
+        glBindVertexArray(PlatForm->GrassVAO);// data of 6 points
+        ourShader->setMat4("model", grasspanel);
+        glDrawArrays(GL_TRIANGLES, 0, 6);// draw 6 points
+        // SO Why four of textures per plane drawing
+
+        // for(unsigned int i = 0; i < 5; i++){
+        //     // Don't know why the texture only showed up
+        //     // when draw the cube one not the plane
+        //     grasspanel = glm::mat4(1.0f);
+        //     grasspanel = glm::translate(grasspanel, vegetation[i]);
+        //     glBindVertexArray(PlatForm->GrassVAO);
+        //     ourShader->setMat4("model", grasspanel);
+        //     glDrawArrays(GL_TRIANGLES, 0, 6);
+        //     glBindVertexArray(0);
+        // }
+       
         // STENCIL ON
         // 2nd still don't know why this part doesn't product anything        
         // Draw the border of the one single cube
