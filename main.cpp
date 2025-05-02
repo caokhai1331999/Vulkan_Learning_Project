@@ -1,5 +1,6 @@
 #include "KPlatformG.h"
 #include "Windows.h"
+#include <map>
 // #include <stdio.h>
 // #include "camera.h"
 #pragma once
@@ -87,7 +88,7 @@ int main(int* argc, char** argv[])
     // NOTE: I have to recall this function to load gl function
     // LoadGLFunctions();        
     Shader* ourShader = nullptr;
-    ourShader = new Shader("7.3.camera.vs", "7.3.camera.fs");
+    ourShader = new Shader("1.blending.vs", "1.blending.fs");
     printf("Lamp Shader ID:%d\n", ourShader->ID);
     
     Shader* lampShader = nullptr;
@@ -150,7 +151,15 @@ int main(int* argc, char** argv[])
         glm::vec3(0.698f, 1.0f, 0.29f),
         glm::vec3( 0.549f, 0.29f, 1.0f)
     };  
-    
+
+    glm::vec3 windows[5] = {
+        glm::vec3(-4.5f,  0.0f, -1.48f),
+        glm::vec3( 4.5f,  0.0f,  1.51f),
+        glm::vec3( 1.0f,  0.0f,  1.7f),
+        glm::vec3(-2.3f,  0.0f, -3.3f),
+        glm::vec3( 2.5f,  0.0f, -1.6f)  
+    };
+
     // Load and create textures
     unsigned int* textures  = nullptr;
     textures = new unsigned int();
@@ -159,6 +168,8 @@ int main(int* argc, char** argv[])
 
     ourShader->use();
     ourShader->setInt("texture1", 6);
+    ourShader->setVec4("SourceLight", glm::vec4(0.0f, 1.0f, 0.0f, 0.6f)); 
+    ourShader->setVec4("DesColor", glm::vec4(1.0f, 0.0f, 0.0f, 1.0f)); 
     printf("Texture 1 ID: %d", textures[1]);
     
     objectShader->use();
@@ -486,62 +497,38 @@ int main(int* argc, char** argv[])
         // =======================
         // DONE! Mistakenly typo mistake in setting uniform variable
         // Draw a plane
-        single_color_shader->use();
-        single_color_shader->setMat4("model", glm::mat4(1.0f));
-        glBindVertexArray(PlatForm->PlaneVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
+        // single_color_shader->use();
+        // single_color_shader->setMat4("model", glm::mat4(1.0f));
+        // glBindVertexArray(PlatForm->PlaneVAO);
+        // glDrawArrays(GL_TRIANGLES, 0, 6);
+        // glBindVertexArray(0);
         
         // Still don't know this I thought sampler2D and BindTexture is the same thing
         //1st :  Render pass draw object as normal, writing to the stencil buffer
         // glStencilFunc(GL_ALWAYS, 1, 0xFF);
         // glStencilMask(0xFF);
         // ==================================================
-        ourShader->use();
+        objectShader->use();
+        planeModel = glm::translate(planeModel, glm::vec3(-1.0f, -2.0f, -4.0f));
         glBindVertexArray(PlatForm->VAO);
-        planeModel = glm::translate(planeModel, glm::vec3(-1.0f, -2.0f, -1.0f));
-        ourShader->setMat4("model", planeModel);
+        objectShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
         // draw grass texture per cube
-        
         planeModel = glm::mat4(1.0f);
-        planeModel = glm::translate(planeModel, glm::vec3(2.0f, -2.0f, 0.0f));
-        glBindVertexArray(PlatForm->VAO);
-        ourShader->setMat4("model", planeModel);
+        planeModel = glm::translate(planeModel, glm::vec3(2.0f, -2.0f, -3.0f));
+        objectShader->setMat4("model", planeModel);
         glDrawArrays(GL_TRIANGLES, 0, 36);        
         
-        glm::mat4 grasspanel = glm::mat4(0.2f);
-
-        glm::vec3 vegetation[5] = {
-            glm::vec3(-1.5f,  0.0f, -0.48f),
-            glm::vec3( 1.5f,  0.0f,  0.51f),
-            glm::vec3( 0.0f,  0.0f,  0.7f),
-            glm::vec3(-0.3f,  0.0f, -2.3f),
-            glm::vec3( 0.5f,  0.0f, -0.6f)
-        };
+        glm::mat4 windoww = glm::mat4(1.0f);
 
         ourShader->use();
-        // glBindTexture(GL_TEXTURE_2D, textures[1]);                
-        // grasspanel = glm::mat4(1.0f);
-        grasspanel = glm::translate(grasspanel, vegetation[2]);
-        glBindVertexArray(PlatForm->GrassVAO);// data of 6 points
-        ourShader->setMat4("model", grasspanel);
-        glDrawArrays(GL_TRIANGLES, 0, 6);// draw 6 points
         // SO Why four of textures per plane drawing
 
-        // for(unsigned int i = 0; i < 5; i++){
-        //     // Don't know why the texture only showed up
-        //     // when draw the cube one not the plane
-        //     grasspanel = glm::mat4(1.0f);
-        //     grasspanel = glm::translate(grasspanel, vegetation[i]);
-        //     glBindVertexArray(PlatForm->GrassVAO);
-        //     ourShader->setMat4("model", grasspanel);
-        //     glDrawArrays(GL_TRIANGLES, 0, 6);
-        //     glBindVertexArray(0);
-        // }
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        // Or glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO)
        
         // STENCIL ON
-        // 2nd still don't know why this part doesn't product anything        
         // Draw the border of the one single cube
         //REMEMBER! : Render pass 2: slight scale the object up. This time disable stencil writing
         // Cause the stencil buffer now filled with several 1s. The parts of the buffer that are 1 are not drawn, thus only the object's differences, making it look like border 
@@ -648,7 +635,35 @@ int main(int* argc, char** argv[])
             glStencilMask(0xFF);
             glStencilFunc(GL_ALWAYS, 0, 0xFF);
             glEnable(GL_DEPTH_TEST);
-        
+
+
+            // Blended object will be drawn last
+            //
+            windoww = glm::mat4(1.0f);
+            windoww = scale(windoww, glm::vec3(0.5f));
+
+            std::map<float, glm::vec3> sorted;
+
+            // The sizeof() doesn't work on C raw array
+            for (unsigned int i = 0; i < 5; i++)
+            {
+                float distance = glm::length(camera.Position - windows[i]);
+                sorted[distance] = windows[i];//distance is index
+            }            
+
+            ourShader->use();
+            for(std::map<float,glm::vec3>::reverse_iterator it = sorted.rbegin(); it != sorted.rend(); ++it) 
+            {
+                // Don't know why the texture only showed up
+                // when draw the cube one not the plane
+                windoww = glm::mat4(1.0f);
+                windoww = scale(windoww, glm::vec3(0.5f));
+                windoww = glm::translate(windoww, it->second);
+                glBindVertexArray(PlatForm->GrassVAO);
+                ourShader->setMat4("model", windoww);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
+                glBindVertexArray(0);                
+            }                          
             
             
             lastFrame = static_cast<float>(glfwGetTime());

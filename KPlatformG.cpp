@@ -211,8 +211,8 @@ void CreateVertexStuff(Platform* p)
     glEnableVertexAttribArray(1);
     
     // ===========================================================================
-    glGenVertexArrays(1, &p->GrassVAO);
     glGenBuffers(1, &p->grassVBO); 
+    glGenVertexArrays(1, &p->GrassVAO);
     glBindBuffer(GL_ARRAY_BUFFER, p->grassVBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GrassVerticles), GrassVerticles, GL_STATIC_DRAW);
     glBindVertexArray(p->GrassVAO);
@@ -293,6 +293,7 @@ bool Init(Platform* PlatForm){
 
     // configure global opengl state
     // -----------------------------
+    glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_STENCIL_TEST);
@@ -392,13 +393,13 @@ unsigned int* LoadTexture(){
     glActiveTexture(GL_TEXTURE6);
     glBindTexture(GL_TEXTURE_2D, texture[1]);
     // set the texture wrapping parameters
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
     // set texture filtering parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     // load image, create texture and generate mipmaps
-    data = stbi_load("grass.png", &width, &height, &nrChannels, 0);
+    data = stbi_load("blending_transparent_window.png", &width, &height, &nrChannels, 0);
     if (data)
     {
         if (nrChannels == 1)
@@ -526,3 +527,8 @@ unsigned int* LoadTexture(){
     return texture;
     // stbi_image_free(data);
 }
+
+// int* make_sorted_list(glm::vec3* camPos, glm::vec3* list){
+//     unsigned int size = static_cast<unsigned int>(list->size());
+//     float distance;
+// }

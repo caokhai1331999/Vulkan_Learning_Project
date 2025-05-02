@@ -64,6 +64,7 @@ void processInput(GLFWwindow *window);
 // void LoadTexture();
 unsigned int* LoadTexture();
 void loadTexture(char const * path, unsigned int* textureID);
+// int* make_sorted_list(glm::vec3* camPos, glm::vec3* list);
 
 #define PLATFORMG_H
 #endif
