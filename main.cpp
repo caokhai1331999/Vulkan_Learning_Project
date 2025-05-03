@@ -642,6 +642,7 @@ int main(int* argc, char** argv[])
             windoww = glm::mat4(1.0f);
             windoww = scale(windoww, glm::vec3(0.5f));
 
+            
             std::map<float, glm::vec3> sorted;
 
             // The sizeof() doesn't work on C raw array
